@@ -24,12 +24,45 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
 
 }
 
+class CallCharTester extends AnsweringHelper{
+    public boolean processMessage(Message message, CharacterManager characterManager){
+        String content = getMessageContent(message);
+        if (content.equals("?tester")){
+            MessageChannel channel = getMessageChannel(message);
+            Snowflake id;
+            try{
+                CharClass charClass = CharClassFactory.createClass("archer");
+                CharRace charRace = CharRaceFactory.createRace("human");
+                if (charClass != null && charRace != null){
+                    id = message.getAuthor().get().getId();
+                    Character character = characterManager.getCharacterById(id);
+                    if (character == null){
+                        characterManager.createNewCharacter(id, charClass, charRace);
+                        characterManager.getCharacterById(id).getInventory().addItem(new SteelShield());
+                        characterManager.getCharacterById(id).getInventory().addItem(new SteelArmor());
+                        characterManager.getCharacterById(id).getInventory().addItem(new DolphinFin());
+                        sendMessage(channel, "Creating a character for you... race: "
+                                + charRace.getName() + "..., class: " + charClass.getName() + "... adding items ... done!");
+                    }
+                    else{
+                        sendMessage(channel, "You already have a character!");
+                    }
+                }
+
+            } catch (Exception e){
+                //
+            }
+            return true;
+        }
+        else return false;
+    }
+}
+
+
 class CallHelp extends AnsweringHelper{
     public boolean processMessage(Message message, CharacterManager characterManager){
-        System.out.println("C1");
         String content = getMessageContent(message);
         if (content.equals("?help")){
-            System.out.println("C1a");
             MessageChannel channel = getMessageChannel(message);
             sendMessage(channel, "Available commands: ?help, ?created, ?ping, ?eq, :dolphin:");
             return true;
@@ -42,10 +75,8 @@ class CallHelp extends AnsweringHelper{
 
 class CallCreation extends AnsweringHelper{
     public boolean processMessage(Message message, CharacterManager characterManager){
-        System.out.println("C2");
         String content = getMessageContent(message);
         if (content.equals("?created")){
-            System.out.println("C2b");
             MessageChannel channel = getMessageChannel(message);
             sendMessage(channel, "The bot was created in 2022!");
             return true;
@@ -56,7 +87,6 @@ class CallCreation extends AnsweringHelper{
 
 class CallPing extends AnsweringHelper{
     public boolean processMessage(Message message, CharacterManager characterManager){
-        System.out.println("C3");
         String content = getMessageContent(message);
         if (content.equals("?ping")){
             MessageChannel channel = getMessageChannel(message);
@@ -69,7 +99,6 @@ class CallPing extends AnsweringHelper{
 
 class CallExperience extends AnsweringHelper{
     public boolean processMessage(Message message, CharacterManager characterManager){
-        System.out.println("C4");
         String content = getMessageContent(message);
         if (content.equals("?exp")){
             MessageChannel channel = getMessageChannel(message);
@@ -82,7 +111,6 @@ class CallExperience extends AnsweringHelper{
 
 class CallRace extends AnsweringHelper{
     public boolean processMessage(Message message, CharacterManager characterManager){
-        System.out.println("C5");
         String content = getMessageContent(message);
         if (content.equals("?race")){
             MessageChannel channel = getMessageChannel(message);
@@ -107,6 +135,24 @@ class CallClass extends AnsweringHelper{
             try{
                 Character character = characterManager.getCharacterById(message.getAuthor().get().getId());
                 sendMessage(channel, character.getCharClass().getName());
+            } catch (Exception e){
+                sendMessage(channel, "Character doesn't exist");
+            }
+            return true;
+        }
+        else return false;
+    }
+}
+
+class CallBodyParts extends AnsweringHelper{
+    public boolean processMessage(Message message, CharacterManager characterManager){
+        String content = getMessageContent(message);
+        if (content.equals("?bodyparts")){
+            MessageChannel channel = getMessageChannel(message);
+            try{
+                Character character = characterManager.getCharacterById(message.getAuthor().get().getId());
+                sendMessage(channel, character.getBody().getHead().getBodyPartName() + ", " + character.getBody().getTorso().getBodyPartName()
+                        + ", " + character.getBody().getLegs().getBodyPartName() + ", " + character.getBody().getFeet().getBodyPartName());
             } catch (Exception e){
                 sendMessage(channel, "Character doesn't exist");
             }
@@ -158,6 +204,51 @@ class CallCreateCharacter extends AnsweringHelper{
     }
 }
 
+class CallInventory extends AnsweringHelper{
+    public boolean processMessage(Message message, CharacterManager characterManager){
+        String content = getMessageContent(message);
+        if (content.equals("?inventory")){
+            MessageChannel channel = getMessageChannel(message);
+            try{
+                Character character = characterManager.getCharacterById(message.getAuthor().get().getId());
+                StringBuilder inventoryNamesOutput = new StringBuilder(1023);
+                inventoryNamesOutput.append("Inventory:\n");
+                for (String string : character.getInventory().getItemNamesWeightValues()){
+                    inventoryNamesOutput.append(string + ",\n");
+                }
+                inventoryNamesOutput.append("Total (weight: " + character.getInventory().getItemsWeight());
+                inventoryNamesOutput.append(" ,value: " + character.getInventory().getItemsValue() + ")");
+                String inventoryNamesFinalString = inventoryNamesOutput.toString();
+                sendMessage(channel, inventoryNamesFinalString);
+            } catch (Exception e){
+                sendMessage(channel, "Character doesn't exist");
+            }
+            return true;
+        }
+        else return false;
+    }
+}
+
+class CallLootChest extends AnsweringHelper{
+    public boolean processMessage(Message message, CharacterManager characterManager){
+        String content = getMessageContent(message);
+        if (content.equals("?lootchest")){
+            MessageChannel channel = getMessageChannel(message);
+            try{
+                Lootable chest = new Chest();
+                Character character = characterManager.getCharacterById(message.getAuthor().get().getId());
+                ArrayList<Item> newItems = chest.loot();
+                character.getInventory().addItems(newItems);
+                sendMessage(channel, "Looted from the chest:\n" + LootingHelper.getItemNamesInString(newItems));
+                } catch (Exception e){
+                    sendMessage(channel, "Character doesn't exist");
+                }
+            return true;
+        }
+        else return false;
+    }
+}
+
 
 class AnswerManager{
     private ArrayList<MessageProcessingMachine> messageProcessingArrayList = new ArrayList<MessageProcessingMachine>();
@@ -170,6 +261,10 @@ class AnswerManager{
         messageProcessingArrayList.add(new CallRace());
         messageProcessingArrayList.add(new CallClass());
         messageProcessingArrayList.add(new CallCreateCharacter());
+        messageProcessingArrayList.add(new CallBodyParts());
+        messageProcessingArrayList.add(new CallInventory());
+        messageProcessingArrayList.add(new CallLootChest());
+        messageProcessingArrayList.add(new CallCharTester());
     }
 
     private boolean selfSending(Message message){
