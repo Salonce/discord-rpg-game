@@ -7,20 +7,25 @@ import discord4j.core.object.entity.Message;
 
 import java.util.HashMap;
 
-public class Main {
 
+public class Main {
     public static void main(String[] args) {
         //log the bot in
         final String token = args[0];
         final DiscordClient client = DiscordClient.create(token);
         final GatewayDiscordClient gateway = client.login().block();
 
+
         //create a list of characters for users
         HashMap<Snowflake, Character> usersCharacters = new HashMap<>();
         AnswerManager answerManager = new AnswerManager();
-        CharacterManager characterManager = new CharacterManager();
+        final CharacterManager characterManager = new CharacterManager();
+        AnsweringHelper.setCharacterManager(characterManager);
+        //final int a = 5;
+
 
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
+            //System.out.println(a);
             final Message message = event.getMessage();
             answerManager.process(message, characterManager);
         });
@@ -54,9 +59,7 @@ class MessageManager{
 //    answerable.add(new AnswerPing());
 //    answerable.add(new AnswerEquipment());
 //    answerable.add(new AnswerHelp());
-
 //send answers on call
-
 
 /*
 abstract class SalonkaBotUser{
@@ -67,4 +70,4 @@ abstract class SalonkaBotUser{
     private int numberOfMessages;
     private int timeSpentInVc;
 }
- */
+*/

@@ -2,36 +2,36 @@ package org.example;
 
 public interface CharRace{
     String getName();
-    int getHealthGrowth();
-    int getManaGrowth();
+    int getHealthIncreasePerLevel();
+    int getManaIncreasePerLevel();
 }
 
 class Human implements CharRace{
     public String getName(){ return "human"; }
-    public int getHealthGrowth(){
+    public int getHealthIncreasePerLevel(){
         return 2;
     }
-    public int getManaGrowth(){
+    public int getManaIncreasePerLevel(){
         return 2;
     }
 }
 
 class Orc implements CharRace{
     public String getName(){ return "orc"; }
-    public int getHealthGrowth(){
+    public int getHealthIncreasePerLevel(){
         return 3;
     }
-    public int getManaGrowth(){
+    public int getManaIncreasePerLevel(){
         return 1;
     }
 }
 
 class Elf implements CharRace{
     public String getName(){ return "elf"; }
-    public int getHealthGrowth(){
+    public int getHealthIncreasePerLevel(){
         return 1;
     }
-    public int getManaGrowth(){
+    public int getManaIncreasePerLevel(){
         return 3;
     }
 }
