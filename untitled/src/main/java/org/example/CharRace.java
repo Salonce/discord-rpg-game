@@ -37,7 +37,7 @@ class Elf implements CharRace{
 }
 
 class CharRaceFactory{
-    static CharRace createRace(String raceName) {
+    static CharRace createRace(String raceName) throws IllegalCharacterRaceException {
         switch (raceName) {
             case "human":
                 return new Human();
@@ -46,7 +46,13 @@ class CharRaceFactory{
             case "elf":
                 return new Elf();
             default:
-                return null;
+                throw new IllegalCharacterRaceException("Race name is wrong.");
         }
+    }
+}
+
+class IllegalCharacterRaceException extends Exception{
+    public IllegalCharacterRaceException(String message){
+        super(message);
     }
 }

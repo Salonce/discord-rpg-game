@@ -1,12 +1,7 @@
 package org.example;
-import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-
-import java.util.HashMap;
-
 
 public class Main {
     public static void main(String[] args) {
@@ -15,19 +10,15 @@ public class Main {
         final DiscordClient client = DiscordClient.create(token);
         final GatewayDiscordClient gateway = client.login().block();
 
-
         //create a list of characters for users
-        HashMap<Snowflake, Character> usersCharacters = new HashMap<>();
-        AnswerManager answerManager = new AnswerManager();
+        final AnswerManager answerManager = new AnswerManager();
         final CharacterManager characterManager = new CharacterManager();
+        final Shop basicShop = new BasicShop();
         AnsweringHelper.setCharacterManager(characterManager);
-        //final int a = 5;
-
+        AnsweringHelper.setShops(basicShop);
 
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
-            //System.out.println(a);
-            final Message message = event.getMessage();
-            answerManager.process(message, characterManager);
+            answerManager.process(event.getMessage());
         });
         gateway.onDisconnect().block();
     }

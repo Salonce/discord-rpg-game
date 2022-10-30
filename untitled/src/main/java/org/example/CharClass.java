@@ -37,7 +37,7 @@ class Archer implements CharClass{
 }
 
 class CharClassFactory{
-    static CharClass createClass(String className) {
+    static CharClass createClass(String className) throws IllegalCharacterClassException {
         switch (className) {
             case "knight":
                 return new Knight();
@@ -46,7 +46,13 @@ class CharClassFactory{
             case "archer":
                 return new Archer();
             default:
-                return null;
+                throw new IllegalCharacterClassException("Class name is wrong.");
         }
     }
+}
+
+class IllegalCharacterClassException extends Exception{
+   public IllegalCharacterClassException(String message){
+       super(message);
+   }
 }

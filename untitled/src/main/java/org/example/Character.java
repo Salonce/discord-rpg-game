@@ -1,5 +1,10 @@
 package org.example;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 class Character implements Battleable{
     public Character(CharClass charClass, CharRace charRace){
         this.charClass = charClass;
@@ -7,6 +12,7 @@ class Character implements Battleable{
         this.body = new Body();
         this.attributes = new Attributes();
         this.inventory = new Inventory();
+        this.actionPoints = new ActionPoints();
     }
 
     private CharClass charClass;
@@ -14,12 +20,14 @@ class Character implements Battleable{
     private Body body;
     private Attributes attributes;
     private Inventory inventory;
+    private ActionPoints actionPoints;
 
     public CharClass getCharClass(){return charClass;}
     public CharRace getCharRace(){return charRace;}
     public Body getBody(){return body;}
     public Attributes getAttributes(){return attributes;}
     public Inventory getInventory(){return inventory;}
+    public ActionPoints getActionPoints() {return actionPoints;}
 
     public BattleStats getBattleStats(){
         return new BattleStats(getAttributes().getHealth(), getAttributes().getStrength(), getAttributes().getEndurance(), getAttributes().getDexterity());
@@ -59,6 +67,74 @@ class Attributes{
     public int getMana(){return this.mana;}
     public int getCapacity(){return this.capacity;}
 }
+
+class ActionPoints{
+    // Duration/period operates on temporals -> duration operates on instants (instant belongs to Temporal)
+    private static final int MAX_AP = 5;
+    private static final int AP_RECOVERY_TIME = 30;
+
+    public ActionPoints(){
+        this.action_points = ActionPoints.MAX_AP;
+    }
+    private ArrayList<Instant> timeList = new ArrayList<>();
+    private int action_points;
+
+    public void addCooldown(int number) throws NotEnoughActionPointsException{
+        if ((getCurrentAP() - number) >= 0) {
+            for (int i = 0; i < number; i++)
+                timeList.add(Instant.now().plusSeconds(AP_RECOVERY_TIME));
+        }
+        else{
+            throw new NotEnoughActionPointsException(String.valueOf(number));
+        }
+    }
+    public int getCurrentAP(){
+        cleanNegativeCooldowns();
+        return (MAX_AP - timeList.size());
+    }
+
+    public String getStringCooldowns(){
+        cleanNegativeCooldowns();
+        StringBuilder cooldownsBuilder = new StringBuilder("[");
+        Iterator<Instant> cooldownIterator = timeList.iterator();
+        while(cooldownIterator.hasNext()){
+            Duration duration = Duration.between(Instant.now(), cooldownIterator.next());
+            cooldownsBuilder.append(duration.getSeconds()+1);
+            if (cooldownIterator.hasNext()){
+                cooldownsBuilder.append(", ");
+            }
+        }
+        cooldownsBuilder.append("]");
+        return cooldownsBuilder.toString();
+    }
+    public void printCooldowns(){
+        cleanNegativeCooldowns();
+        Iterator<Instant> cooldownIterator = timeList.iterator();
+        while(cooldownIterator.hasNext()){
+            Duration duration = Duration.between(Instant.now(), cooldownIterator.next());
+            if (duration.isPositive()){
+                System.out.println("seconds of duration: " + duration.getSeconds());
+            }
+            else;
+        }
+    }
+    private void cleanNegativeCooldowns(){
+        Iterator<Instant> cooldownIterator = timeList.iterator();
+        while(cooldownIterator.hasNext()){
+            if (Instant.now().compareTo(cooldownIterator.next()) >= 0){
+                cooldownIterator.remove();
+            }
+            else;
+        }
+    }
+}
+
+class NotEnoughActionPointsException extends Exception{
+    public NotEnoughActionPointsException(String message){
+        super(message);
+    }
+}
+
 
 
 /*

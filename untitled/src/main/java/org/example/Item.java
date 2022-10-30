@@ -2,9 +2,12 @@ package org.example;
 
 
 abstract class Item{
+    private final int PRICE_MULTIPLICATOR = 2;
+
     protected abstract String getName();
     protected abstract int getWeight();
     protected abstract int getValue();
+    protected int getPrice(){ return getValue()*PRICE_MULTIPLICATOR; }
 }
 
 abstract class Helmet extends Item{}
