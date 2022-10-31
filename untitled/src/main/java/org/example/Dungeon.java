@@ -1,51 +1,31 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Random;
 
-
-
+abstract class Chancer{
+    private static Random random = new Random();
+    public static void chanceItem(Collection<Item> newItems, Item item, int probability){
+        if (random.nextInt(100) < probability){
+            newItems.add(item);
+        }
+    }
+}
 
 interface Lootable{
     ArrayList<Item> loot();
-}
-
-public abstract class Dungeon implements Lootable {
-    public abstract void visit(Character character);
-
 }
 
 class Chest implements Lootable{
     public ArrayList<Item> loot(){
         ArrayList<Item> newItems = new ArrayList<>();
 
-        Random rand = new Random();
-        // Obtain a number between [0 - 49].
-        int n;
-        n = rand.nextInt(100);
-        if (n < 30){
-            Item item = new SteelBoots();
-            newItems.add(item);
-        }
-        n = rand.nextInt(100);
-        if (n < 30){
-            Item item = new SteelArmor();
-            newItems.add(item);
-        }
-        n = rand.nextInt(100);
-        if (n < 30){
-            Item item = new SteelShield();
-            newItems.add(item);
-        }
-        n = rand.nextInt(100);
-        if (n < 10){
-            Item item = new DolphinFin();
-            newItems.add(item);
-        }
+        Chancer.chanceItem(newItems, ItemManager.STEEL_HELMET, 30);
+        Chancer.chanceItem(newItems, ItemManager.STEEL_ARMOR, 30);
+        Chancer.chanceItem(newItems, ItemManager.STEEL_SHIELD, 30);
+        Chancer.chanceItem(newItems, ItemManager.DOLPHIN_FIN, 10);
         return newItems;
-
-
-
     }
 }
 
@@ -71,6 +51,10 @@ class LootingHelper{
     }
 }
 
-//class Cave extends Dungeon{
-//
-//}
+/*
+class DungeonManager{}
+public class Dungeon implements Lootable {
+    ArrayList<Item> loot(){
+    };
+}
+*/

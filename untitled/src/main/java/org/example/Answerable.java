@@ -98,9 +98,9 @@ class CallCharTester extends AnsweringHelper{
                 CharClass charClass = CharClassFactory.createClass("archer");
                 CharRace charRace = CharRaceFactory.createRace("human");
                      getCharacterManager().createNewCharacter(getId(), charClass, charRace);
-                     getCharacterManager().getCharacterById(getId()).getInventory().addItem(new SteelShield());
-                     getCharacterManager().getCharacterById(getId()).getInventory().addItem(new SteelArmor());
-                     getCharacterManager().getCharacterById(getId()).getInventory().addItem(new DolphinFin());
+                     getCharacterManager().getCharacterById(getId()).getInventory().addItem(ItemManager.STEEL_SHIELD);
+                     getCharacterManager().getCharacterById(getId()).getInventory().addItem(ItemManager.STEEL_ARMOR);
+                     getCharacterManager().getCharacterById(getId()).getInventory().addItem(ItemManager.DOLPHIN_FIN);
                      sendMessage(getMessageChannel(), "Creating a character for you... \nrace: "
                           + charRace.getName() + "...,\nclass: " + charClass.getName() + "... \nadding items ... done!");
             } catch(Exception e){
@@ -232,9 +232,7 @@ class CallLootChest extends AnsweringHelper{
                 //AP taken without checks yet
                 try {
                     getCharacter().getActionPoints().addCooldown(2);
-                    StringBuilder stringBuilder = new StringBuilder("You are using 2 AP to loot (" + getCharacter().getActionPoints().getCurrentAP() + "/10AP left).");
-                    //sendMessage(getMessageChannel(), "You are using 2 AP to loot (" + getCharacter().getActionPoints().getCurrentAP() + "/10AP left).");
-
+                    StringBuilder stringBuilder = new StringBuilder("You are using 2 AP to loot (" + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP + "AP left).");
                     Lootable chest = new Chest();
                     ArrayList<Item> newItems = chest.loot();
                     getCharacter().getInventory().addItems(newItems);
@@ -253,7 +251,7 @@ class CallCooldowns extends AnsweringHelper{
         if (getContent().equals("?ap")){
             if (characterCheck()) {
                 //AP taken without checks yet
-                sendMessage(getMessageChannel(), "Action points: " + getCharacter().getActionPoints().getCurrentAP() + "/10.\nCooldowns (seconds): " + getCharacter().getActionPoints().getStringCooldowns());
+                sendMessage(getMessageChannel(), "Action points: " + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP + ".\nCooldowns (seconds): " + getCharacter().getActionPoints().getStringCooldowns());
             }
         }
     }

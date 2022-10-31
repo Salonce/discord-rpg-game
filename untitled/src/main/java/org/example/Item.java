@@ -1,132 +1,177 @@
 package org.example;
 
 
+class ItemManager{
+    //EQUIPMENT
+    public final static Item STEEL_HELMET = new Helmet("Steel helmet", 3, 25, 3);
+    public final static Item STEEL_ARMOR = new Armor("Steel armor", 15, 55, 10);
+    public final static Item STEEL_TROUSERS = new Trousers("Steel trousers", 10, 35, 7);
+    public final static Item STEEL_GLOVES = new Gloves("Steel gloves", 3, 10, 3);
+    public final static Item STEEL_BOOTS = new Boots("Steel boots", 4, 25, 3);
+    public final static Item STEEL_SHIELD = new Shield("Steel shield", 5, 45, 6);
+    public final static Item STEEL_SWORD = new Weapon("Steel sword", 3, 45, 10);
+
+    //MONEY
+    public final static Item GOLD = new Money("Gold", 1, 1);
+
+    //CRAFTING ITEMS
+    public final static Item DOLPHIN_FIN = new CraftingItem("Dolphin's fin :dolphin:", 2, 100);
+}
+
+
+
 abstract class Item{
+    public Item(String name, int weight, int value){
+        this.name = name;
+        this.weight = weight;
+        this.value = value;
+    }
     private final int PRICE_MULTIPLICATOR = 2;
 
-    protected abstract String getName();
-    protected abstract int getWeight();
-    protected abstract int getValue();
+    protected String name;
+    protected int weight;
+    protected int value;
+    //private int price;
+
+    protected String getName(){return name;}
+    protected int getWeight(){return weight;}
+    protected int getValue(){return value;}
     protected int getPrice(){ return getValue()*PRICE_MULTIPLICATOR; }
 }
 
-abstract class Helmet extends Item{}
-abstract class Armor extends Item{}
-abstract class Trousers extends Item{}
-abstract class Gloves extends Item{}
-abstract class Boots extends Item{}
-abstract class Weapon extends Item{}
-abstract class Shield extends Item{}
-
-class SteelHelmet extends Helmet{
-    protected String getName(){
-        return "steel helmet";
-    };
-    protected int getWeight(){
-        return 5;
-    };
-    protected int getValue(){
-        return 25;
-    };
-}
-
-class SteelArmor extends Armor{
-    protected String getName(){
-        return "steel armor";
-    };
-    protected int getWeight(){
-        return 15;
-    };
-    protected int getValue(){
-        return 55;
-    };
-}
-
-class SteelTrousers extends Trousers{
-    protected String getName(){
-        return "steel trousers";
-    };
-    protected int getWeight(){
-        return 10;
-    };
-    protected int getValue(){
-        return 35;
-    };
-}
-
-class SteelGloves extends Gloves{
-    protected String getName(){
-        return "steel gloves";
-    };
-    protected int getWeight(){
-        return 3;
-    };
-    protected int getValue(){
-        return 10;
-    };
-}
-
-class SteelBoots extends Boots{
-    protected String getName(){
-        return "steel boots";
-    };
-    protected int getWeight(){
-        return 4;
-    };
-    protected int getValue(){
-        return 25;
-    };
-}
-
-class SteelSword extends Weapon{
-    protected String getName(){
-        return "steel sword";
-    };
-    protected int getWeight(){
-        return 3;
-    };
-    protected int getValue(){
-        return 45;
-    };
-}
-
-class SteelShield extends Shield{
-    protected String getName(){
-        return "steel shield";
-    };
-    protected int getWeight(){
-        return 5;
-    };
-    protected int getValue(){
-        return 45;
-    };
-}
-
-
-class Gold extends Item{
-    @Override
-    protected String getName(){
-        return "gold";
+abstract class DefensiveItem extends Item{
+    protected int defence;
+    public DefensiveItem(String name, int weight, int value, int defence){
+        super(name, weight, value);
+        this.defence = defence;
     }
-    @Override
-    protected int getWeight(){
-        return 1;
-    }
-    protected int getValue(){
-        return 1;
-    };
+    public int getDefence() {return defence;}
 }
 
-class DolphinFin extends Item{
-    @Override
-    protected String getName(){
-        return "dolphin's fin :dolphin:";
+abstract class OffensiveItem extends Item{
+    protected int attack;
+    public OffensiveItem(String name, int weight, int value, int attack){
+        super(name, weight, value);
+        this.attack = attack;
     }
-    @Override
-    protected int getWeight(){
-        return 2;
-    }
-    protected int getValue(){
-        return 100;
-    };
+    public int getAttack() {return attack;}
 }
+
+
+class Helmet extends DefensiveItem{
+    public Helmet(String name, int weight, int value, int defence){
+        super(name, weight, value, defence);
+    }
+}
+
+final class Armor extends DefensiveItem{
+    public Armor(String name, int weight, int value, int defence){
+        super(name, weight, value, defence);
+    }
+}
+final class Trousers extends DefensiveItem{
+    public Trousers(String name, int weight, int value, int defence){
+        super(name, weight, value, defence);
+    }
+}
+final class Gloves extends DefensiveItem{
+    public Gloves(String name, int weight, int value, int defence){
+        super(name, weight, value, defence);
+    }
+}
+final class Boots extends DefensiveItem{
+    public Boots(String name, int weight, int value, int defence){
+        super(name, weight, value, defence);
+    }
+}
+final class Shield extends DefensiveItem{
+    public Shield(String name, int weight, int value, int defence){
+        super(name, weight, value, defence);
+    }
+}
+final class Weapon extends OffensiveItem{
+    public Weapon(String name, int weight, int value, int attack){
+        super(name, weight, value, attack);
+    }
+}
+final class Money extends Item{
+    public Money(String name, int weight, int value){
+        super(name, weight, value);
+    }
+}
+final class CraftingItem extends Item{
+    public CraftingItem(String name, int weight, int value){
+        super(name, weight, value);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+public class DefensiveItemBuilder<T extends DefensiveItem>{
+    public DefensiveItemBuilder(){}
+    private String name;
+    private int weight;
+    private int value;
+    private int price;
+
+    public DefensiveItemBuilder setName(String name){
+        this.name = name;
+        return this;
+    }
+    public DefensiveItemBuilder setWeight(int weight){
+        this.weight = weight;
+        return this;
+    }
+    public DefensiveItemBuilder setValue(int value){
+        this.value = value;
+        return this;
+    }
+    public DefensiveItemBuilder setPrice(int price){
+        this.price = price;
+        return this;
+    }
+    public T build(){
+        return new T(this);
+    }
+}
+*/
+
+/*
+
+    ////BUILDER
+    private Helmet(HelmetBuilder helmetBuilder){
+        super(helmetBuilder.name, helmetBuilder.weight, helmetBuilder.value);
+    }
+
+    public static class HelmetBuilder{
+        public HelmetBuilder(){}
+        private String name;
+        private int weight;
+        private int value;
+
+        public HelmetBuilder setName(String name){
+            this.name = name;
+            return this;
+        }
+        public HelmetBuilder setWeight(int weight){
+            this.weight = weight;
+            return this;
+        }
+        public HelmetBuilder setValue(int value){
+            this.value = value;
+            return this;
+        }
+        public Helmet buildHelmet(){
+            return new Helmet(this);
+        }
+    }
+ */
