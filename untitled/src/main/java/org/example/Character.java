@@ -70,7 +70,7 @@ class Attributes{
 
 class ActionPoints{
     // Duration/period operates on temporals -> duration operates on instants (instant belongs to Temporal)
-    public static final int MAX_AP = 9;
+    public static final int MAX_AP = 19;
     public static final int AP_RECOVERY_TIME = 30;
 
     public ActionPoints(){

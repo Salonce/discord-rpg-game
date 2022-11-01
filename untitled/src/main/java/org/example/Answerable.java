@@ -3,9 +3,14 @@ package org.example;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Color;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 interface MessageProcessingMachine{
     void processMessage();
@@ -15,46 +20,54 @@ interface MessageProcessingMachine{
 //    private MessageProcessingMachine
 //}
 
+
+class InvalidUserException extends Exception{
+    public InvalidUserException(String message){
+        super(message);
+    }
+}
+
 abstract class AnsweringHelper implements MessageProcessingMachine{
-    //public static Message getMessage() {return message;}
-    private static Message message;
-
-    public static void setMessage(Message message) {AnsweringHelper.message = message;
-        setContent(message.getContent());
-        setChannel(message.getChannel().block());
-
-        try {
-            setId(message.getAuthor().get().getId());
-        }
-        catch(Exception e){
-            setId(null);
-        }
-
-        try {
-            setCharacter(characterManager.getCharacterById(message.getAuthor().get().getId()));
-        } catch (Exception e) {
-            setCharacter(null);
-        }
-    }
-
-    public static void setCharacterManager(CharacterManager characterManager) {
-        AnsweringHelper.characterManager = characterManager;
-    }
-///
-    private static Shop shop;
-    public static void setShops(Shop shop) {
-        AnsweringHelper.shop = shop;
-    }
-    public static Shop getShop(){return AnsweringHelper.shop;}
-////
     private static String content;
     private static MessageChannel channel;
     private static Snowflake id;
     private static Character character;
     private static CharacterManager characterManager;
+    private static String userName;
+    private static String userNameId;
+    private static String userAvatarUrl;
 
+    public static void setCharacterManager(CharacterManager characterManager) {
+        AnsweringHelper.characterManager = characterManager;
+    }
 
-    protected static String getContent(){return content;};
+    public static void setMessage(Message message) throws InvalidUserException {
+        try {
+            AnsweringHelper.id = message.getAuthor().get().getId();
+            AnsweringHelper.content = message.getContent();
+            AnsweringHelper.channel = message.getChannel().block();
+            AnsweringHelper.userName = message.getAuthor().get().getUsername();
+            AnsweringHelper.userNameId = "<@" + id.asString() + ">";
+            AnsweringHelper.userAvatarUrl = message.getAuthor().get().getAvatarUrl();
+            AnsweringHelper.character = characterManager.getCharacterById(id);
+        }
+        catch(NoSuchElementException noSuchElementException){
+            throw new InvalidUserException("Invalid message Author");
+        } catch (NoSuchCharacterException noSuchCharacterException) {
+            AnsweringHelper.character = null;
+        }
+    }
+    ///
+    private static Shop shop;
+    public static void setShops(Shop shop) {
+        AnsweringHelper.shop = shop;
+    }
+    public static Shop getShop(){return AnsweringHelper.shop;}
+    ////
+    protected static String getUserAvatarUrl(){return userAvatarUrl;}
+    protected static String getUserNameId(){return userNameId;}
+    protected static String getUserName(){return userName;}
+    protected static String getContent(){return content;}
     protected static MessageChannel getMessageChannel(){return channel;}
     protected static Snowflake getId(){return id;}
     protected static Character getCharacter(){return character;}
@@ -74,22 +87,16 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
         }
         else return true;
     }
-
-    private static void setContent(String content) {AnsweringHelper.content = content;}
-    private static void setChannel(MessageChannel channel) {AnsweringHelper.channel = channel;}
-    private static void setId(Snowflake id) {AnsweringHelper.id = id;}
-    private static void setCharacter(Character character) {
-        try{
-            AnsweringHelper.character = character;
-        } catch (Exception e){
-            sendMessage(channel, "Character doesn't exist");
-            AnsweringHelper.character = null;
-        }
-    }
     protected static void sendMessage(MessageChannel messageChannel, String message){
         messageChannel.createMessage(message).block();
     }
+    protected static void sendMessage(MessageChannel messageChannel, EmbedCreateSpec embedMessage){
+        messageChannel.createMessage(embedMessage).block();
+    }
 }
+
+
+
 
 class CallCharTester extends AnsweringHelper{
     public void processMessage(){
@@ -128,13 +135,6 @@ class CallCreation extends AnsweringHelper{
     }
 }
 
-class CallPing extends AnsweringHelper{
-    public void processMessage(){
-        if (getContent().equals("?ping")){
-            sendMessage(getMessageChannel(), "Pong!");
-        }
-    }
-}
 
 class CallExperience extends AnsweringHelper{
     public void processMessage(){
@@ -176,9 +176,6 @@ class CallCreateCharacter extends AnsweringHelper{
     public void processMessage(){
         try{
             String[] splitString = getContent().split(" ");
-            //for (String string : splitString){
-            //    System.out.println(string + "...");
-            //}
             if (splitString[0].equals("?create")){
                 try{
                     CharClass charClass = CharClassFactory.createClass(splitString[1]);
@@ -189,18 +186,14 @@ class CallCreateCharacter extends AnsweringHelper{
                         sendMessage(getMessageChannel(), "Creating a character for you... race: "
                              + charRace.getName() + "..., class: " + charClass.getName() + "... done!");
                     }
-                } catch (Exception e){
-                    System.out.println(e.toString());
-                    if (e instanceof IllegalCharacterClassException){
-                        sendMessage(getMessageChannel(), "Incorrect creation command! Illegal class name! Try:\n?'create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
-                    }
-                    else if (e instanceof IllegalCharacterRaceException){
+                } catch (IllegalCharacterClassException e) {
+                    sendMessage(getMessageChannel(), "Incorrect creation command! Illegal class name! Try:\n?'create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
+                } catch (IllegalCharacterRaceException e){
                         sendMessage(getMessageChannel(), "Incorrect creation command!  Illegal race name! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
-                    }
-                    else if (e instanceof ArrayIndexOutOfBoundsException){
+                } catch (ArrayIndexOutOfBoundsException e){
                         sendMessage(getMessageChannel(), "Incorrect creation command! Not enough arguments! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
-                    }
-                    else sendMessage(getMessageChannel(), "Incorrect command! Try:\n?create <class> <race>\nExample: *?create archer orc*");
+                } catch (Exception e){
+                    sendMessage(getMessageChannel(), "Incorrect command! Try:\n?create <class> <race>\nExample: *?create archer orc*");
                 }
             }
         }
@@ -213,14 +206,41 @@ class CallInventory extends AnsweringHelper{
         if (getContent().equals("?inventory")){
             if (characterCheck()) {
                 StringBuilder inventoryNamesOutput = new StringBuilder(1023);
-                inventoryNamesOutput.append("Inventory:\n");
+                inventoryNamesOutput.append("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ") (w - weight, v - value): \n");
                 for (String string : getCharacter().getInventory().getItemNamesWeightValues()) {
                     inventoryNamesOutput.append(string + ",\n");
                 }
-                inventoryNamesOutput.append("Total (weight: " + getCharacter().getInventory().getItemsWeight());
-                inventoryNamesOutput.append(" ,value: " + getCharacter().getInventory().getItemsValue() + ")");
+                inventoryNamesOutput.append("Total (w: " + getCharacter().getInventory().getItemsWeight());
+                inventoryNamesOutput.append(", v: " + getCharacter().getInventory().getItemsValue() + ")");
                 sendMessage(getMessageChannel(), inventoryNamesOutput.toString());
             }
+        }
+    }
+}
+
+class CallPing extends AnsweringHelper{
+    public void processMessage(){
+        if (getContent().equals("?ping")){
+            if (characterCheck()) {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                        .color(Color.BLUE)
+                        .title("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
+                        .author(getUserName(), null, getUserAvatarUrl())
+                        //.author(getUserName(), "https://discord4j.com", "https://i.imgur.com/F9BhEoz.png")
+                        //.description("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
+                        .thumbnail("https://openclipart.org/image/800px/330656")
+                        //.addField("field title", "value", false)
+                        //.addField("\u200B", "\u200B", false)
+                        .addField(" NAME", getCharacter().getInventory().getItemNamesForEmbed(), true)
+                        .addField(" VALUE", getCharacter().getInventory().getItemValuesForEmbed(), true)
+                        .addField(" WEIGHT", getCharacter().getInventory().getItemWeightsForEmbed(), true)
+                        //.addField("\u200B", "\u200B", false)
+                        //.addField("SUMMARY", "Total value: " + getCharacter().getInventory().getItemsValue() + " Total weight: " + getCharacter().getInventory().getItemsWeight(), false)
+                        .timestamp(Instant.now())
+                        .build();
+                sendMessage(getMessageChannel(), embed);
+            }
+
         }
     }
 }
@@ -229,17 +249,19 @@ class CallLootChest extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?loot")){
             if (characterCheck()) {
-                //AP taken without checks yet
+                StringBuilder stringBuilder = new StringBuilder();
                 try {
-                    getCharacter().getActionPoints().addCooldown(2);
-                    StringBuilder stringBuilder = new StringBuilder("You are using 2 AP to loot (" + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP + "AP left).");
-                    Lootable chest = new Chest();
-                    ArrayList<Item> newItems = chest.loot();
-                    getCharacter().getInventory().addItems(newItems);
-                    stringBuilder.append("\nLooted from the chest:\n" + LootingHelper.getItemNamesInString(newItems));
+                    getCharacter().getActionPoints().addCooldown(2); //not Enough AP exception
+                    stringBuilder.append("You use 2AP (" + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP + "AP left).");
+                    ArrayList<Item> newItems = new Chest().loot();
+                    stringBuilder.append("\nLoot:\n" + LootingHelper.getItemNamesInString(newItems));
+                    getCharacter().getInventory().addItems(newItems); //Inventory full exception
+                } catch(NotEnoughActionPointsException e){
+                    stringBuilder.append("Not enough action points! You need " + e.getMessage() + "AP to continue. Use *?ap* command to check your status.");
+                } catch (InventoryFullException e){
+                    stringBuilder.append("Inventory is full! Can't take everything from the chest!");
+                } finally {
                     sendMessage(getMessageChannel(), stringBuilder.toString());
-                } catch(Exception e){
-                    sendMessage(getMessageChannel(), "Not enough action points! You need " + e.getMessage() + "AP to continue. Use *?ap* command to check your status.");
                 }
             }
         }
@@ -250,6 +272,7 @@ class CallCooldowns extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?ap")){
             if (characterCheck()) {
+
                 //AP taken without checks yet
                 sendMessage(getMessageChannel(), "Action points: " + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP + ".\nCooldowns (seconds): " + getCharacter().getActionPoints().getStringCooldowns());
             }
@@ -267,9 +290,10 @@ class CallShop extends AnsweringHelper{
     }
 }
 
-class AnswerManager{
+class AnswerManager {
     private ArrayList<MessageProcessingMachine> messageProcessingArrayList = new ArrayList<>();
-    public AnswerManager(){
+
+    public AnswerManager() {
         messageProcessingArrayList.add(new CallHelp());
         messageProcessingArrayList.add(new CallCreation());
         messageProcessingArrayList.add(new CallPing());
@@ -285,45 +309,31 @@ class AnswerManager{
         messageProcessingArrayList.add(new CallShop());
     }
 
-    private boolean selfSending(Message message){
+    private boolean selfSending(Message message) {
         try {
-            if (message.getAuthor().get().getId().asString().equals("772821811707904022")){
+            if (message.getAuthor().get().getId().asString().equals("772821811707904022")) {
                 return true;
             }
-        } catch (Exception e){
+            return false;
+        } catch (NoSuchElementException e) {
             return false;
         }
-        return false;
     }
-
-    private boolean callConditions(Message message){
-        if (selfSending(message))
-            return false;
-        return true;
-    }
-
-    public void process(Message message){
-        AnsweringHelper.setMessage(message);
-        try {
-            if (callConditions(message)) {
+    public void process(Message message) {
+        try{
+            if (!selfSending(message)) {
+                AnsweringHelper.setMessage(message);
                 Iterator<MessageProcessingMachine> messageProcessingMachine = messageProcessingArrayList.iterator();
-                while (messageProcessingMachine.hasNext()){
+                while (messageProcessingMachine.hasNext()) {
                     //System.out.println("executing...");
                     messageProcessingMachine.next().processMessage();
                 }
             }
-        } catch (RuntimeException e){
-            if (e instanceof RuntimeException) {
-                System.out.println("message properly processed, runException");
-            }
-            else System.out.println("can't process the message, someException");
         }
-        catch (Exception e){
-
+        catch(InvalidUserException e){
         }
     }
 }
-
 
 /*
     protected MessageChannel getMessageChannel(Message message){

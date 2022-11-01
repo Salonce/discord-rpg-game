@@ -12,7 +12,16 @@ public class CharacterManager {
     public void createNewCharacter(Snowflake id, CharClass charClass, CharRace charRace){
         usersCharacters.put(id, new Character(charClass, charRace));
     }
-    public Character getCharacterById(Snowflake id){
-        return usersCharacters.get(id);
+    public Character getCharacterById(Snowflake id) throws NoSuchCharacterException {
+        if (usersCharacters.get(id) == null){
+            throw new NoSuchCharacterException("No such character");
+        }
+        else return usersCharacters.get(id);
+    }
+}
+
+class NoSuchCharacterException extends Exception{
+    public NoSuchCharacterException(String message){
+        super(message);
     }
 }

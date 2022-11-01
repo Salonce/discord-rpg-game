@@ -12,7 +12,7 @@ class ItemManager{
     public final static Item STEEL_SWORD = new Weapon("Steel sword", 3, 45, 10);
 
     //MONEY
-    public final static Item GOLD = new Money("Gold", 1, 1);
+    public final static Item GOLD = new Money("Gold", 0, 0);
 
     //CRAFTING ITEMS
     public final static Item DOLPHIN_FIN = new CraftingItem("Dolphin's fin :dolphin:", 2, 100);
@@ -21,7 +21,9 @@ class ItemManager{
 
 
 abstract class Item{
+    //public static int MAX_ITEM_NAME_LENGTH = 15;
     public Item(String name, int weight, int value){
+
         this.name = name;
         this.weight = weight;
         this.value = value;
@@ -37,6 +39,18 @@ abstract class Item{
     protected int getWeight(){return weight;}
     protected int getValue(){return value;}
     protected int getPrice(){ return getValue()*PRICE_MULTIPLICATOR; }
+}
+
+final class Money extends Item{
+    public Money(String name, int weight, int value){
+        super(name, weight, value);
+    }
+}
+
+final class CraftingItem extends Item{
+    public CraftingItem(String name, int weight, int value){
+        super(name, weight, value);
+    }
 }
 
 abstract class DefensiveItem extends Item{
@@ -94,16 +108,7 @@ final class Weapon extends OffensiveItem{
         super(name, weight, value, attack);
     }
 }
-final class Money extends Item{
-    public Money(String name, int weight, int value){
-        super(name, weight, value);
-    }
-}
-final class CraftingItem extends Item{
-    public CraftingItem(String name, int weight, int value){
-        super(name, weight, value);
-    }
-}
+
 
 
 
