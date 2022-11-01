@@ -245,6 +245,33 @@ class CallPing extends AnsweringHelper{
     }
 }
 
+class CallI extends AnsweringHelper{
+    public void processMessage(){
+        if (getContent().equals("?i")){
+            if (characterCheck()) {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                        .color(Color.BLUE)
+                        .title("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
+                        .author(getUserName(), null, getUserAvatarUrl())
+                        //.author(getUserName(), "https://discord4j.com", "https://i.imgur.com/F9BhEoz.png")
+                        //.description("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
+                        .thumbnail("https://openclipart.org/image/800px/330656")
+                        //.addField("field title", "value", false)
+                        //.addField("\u200B", "\u200B", false)
+                        .addField(" NAME", getCharacter().getInventory().getItemNamesForEmbed(), true)
+                        .addField(" VALUE", getCharacter().getInventory().getItemValuesForEmbed(), true)
+                        .addField(" WEIGHT", getCharacter().getInventory().getItemWeightsForEmbed(), true)
+                        //.addField("\u200B", "\u200B", false)
+                        //.addField("SUMMARY", "Total value: " + getCharacter().getInventory().getItemsValue() + " Total weight: " + getCharacter().getInventory().getItemsWeight(), false)
+                        .timestamp(Instant.now())
+                        .build();
+                sendMessage(getMessageChannel(), embed);
+            }
+
+        }
+    }
+}
+
 class CallLootChest extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?loot")){
@@ -272,9 +299,16 @@ class CallCooldowns extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?ap")){
             if (characterCheck()) {
-
                 //AP taken without checks yet
-                sendMessage(getMessageChannel(), "Action points: " + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP + ".\nCooldowns (seconds): " + getCharacter().getActionPoints().getStringCooldowns());
+                sendMessage(getMessageChannel(), "Action points: " + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP
+                        //+ ".\nCooldowns (seconds): " + getCharacter().getActionPoints().getStringCooldowns()
+                        + ".\nAP recovery time (each): " + getCharacter().getActionPoints().AP_RECOVERY_TIME
+                        + ".\nAction points available in: " + getCharacter().getActionPoints().getFirstCD() + " (next), "
+                        + getCharacter().getActionPoints().getLastCD() + " (all)."
+                        //+ ".\nAll AP available in: " + getCharacter().getActionPoints().getLastCD()
+                );
+
+
             }
         }
     }
@@ -307,6 +341,7 @@ class AnswerManager {
         messageProcessingArrayList.add(new CallCharTester());
         messageProcessingArrayList.add(new CallCooldowns());
         messageProcessingArrayList.add(new CallShop());
+        messageProcessingArrayList.add(new CallI());
     }
 
     private boolean selfSending(Message message) {

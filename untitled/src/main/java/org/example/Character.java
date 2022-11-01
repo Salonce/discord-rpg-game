@@ -36,53 +36,31 @@ class Character implements Battleable{
     //Inventory inventory;
 }
 
-class Attributes{
-    public Attributes(){
-        this.health = 100;
-        this.mana = 100;
-        this.capacity = 100;
-        this.strength = 10;
-        this.dexterity = 10;
-        this.endurance = 10;
-    }
-
-    private int health;
-    private int mana;
-    private int strength;
-    private int dexterity;
-    private int endurance;
-    private int capacity;
-
-
-    public int getStrength() {
-        return strength;
-    }
-    public int getDexterity() {
-        return dexterity;
-    }
-    public int getEndurance() {
-        return endurance;
-    }
-    public int getHealth(){return this.health;}
-    public int getMana(){return this.mana;}
-    public int getCapacity(){return this.capacity;}
-}
-
 class ActionPoints{
     // Duration/period operates on temporals -> duration operates on instants (instant belongs to Temporal)
     public static final int MAX_AP = 19;
     public static final int AP_RECOVERY_TIME = 30;
 
     public ActionPoints(){
-        this.action_points = ActionPoints.MAX_AP;
+        //this.action_points = ActionPoints.MAX_AP;
     }
     private ArrayList<Instant> timeList = new ArrayList<>();
-    private int action_points;
+    //private int action_points;
+
+    private Instant getLastInstant(){
+        Instant lastInstant;
+        if (!timeList.isEmpty())
+            lastInstant = timeList.get(timeList.size() - 1);
+        else{
+            lastInstant = Instant.now();
+        }
+        return lastInstant;
+    }
 
     public void addCooldown(int number) throws NotEnoughActionPointsException{
         if ((getCurrentAP() - number) >= 0) {
             for (int i = 0; i < number; i++)
-                timeList.add(Instant.now().plusSeconds(AP_RECOVERY_TIME));
+                timeList.add(getLastInstant().plusSeconds(AP_RECOVERY_TIME));
         }
         else{
             throw new NotEnoughActionPointsException(String.valueOf(number));
@@ -93,6 +71,39 @@ class ActionPoints{
         return (MAX_AP - timeList.size());
     }
 
+    public long getFirstCD(){
+        cleanNegativeCooldowns();
+        try {
+            Duration duration = Duration.between(Instant.now(), timeList.get(0));
+            if (duration.isPositive()) {
+                return duration.getSeconds();
+            }
+        } catch (IndexOutOfBoundsException e){
+            //do nothing
+        }
+        return 0;
+    }
+    public long getLastCD(){
+        cleanNegativeCooldowns();
+        Duration duration = Duration.between(Instant.now(), getLastInstant());
+        if (duration.isPositive()){
+            return duration.getSeconds();
+        }
+        return 0;
+    }
+
+    private void cleanNegativeCooldowns(){
+        Iterator<Instant> cooldownIterator = timeList.iterator();
+        while(cooldownIterator.hasNext()){
+            if (Instant.now().compareTo(cooldownIterator.next()) >= 0){
+                cooldownIterator.remove();
+            }
+            else;
+        }
+    }
+
+
+    /////TESTING / LEGACY METHODS
     public String getStringCooldowns(){
         cleanNegativeCooldowns();
         StringBuilder cooldownsBuilder = new StringBuilder("[");
@@ -118,15 +129,6 @@ class ActionPoints{
             else;
         }
     }
-    private void cleanNegativeCooldowns(){
-        Iterator<Instant> cooldownIterator = timeList.iterator();
-        while(cooldownIterator.hasNext()){
-            if (Instant.now().compareTo(cooldownIterator.next()) >= 0){
-                cooldownIterator.remove();
-            }
-            else;
-        }
-    }
 }
 
 class NotEnoughActionPointsException extends Exception{
@@ -137,7 +139,25 @@ class NotEnoughActionPointsException extends Exception{
 
 
 
+
+
+
 /*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 interface Comparable<T> {
     int compareTo(T o);
 }
