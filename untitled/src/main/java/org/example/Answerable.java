@@ -7,10 +7,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 interface MessageProcessingMachine{
     void processMessage();
@@ -221,53 +218,28 @@ class CallInventory extends AnsweringHelper{
 class CallPing extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?ping")){
-            if (characterCheck()) {
-                EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                        .color(Color.BLUE)
-                        .title("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
-                        .author(getUserName(), null, getUserAvatarUrl())
-                        //.author(getUserName(), "https://discord4j.com", "https://i.imgur.com/F9BhEoz.png")
-                        //.description("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
-                        .thumbnail("https://openclipart.org/image/800px/330656")
-                        //.addField("field title", "value", false)
-                        //.addField("\u200B", "\u200B", false)
-                        .addField(" NAME", getCharacter().getInventory().getItemNamesForEmbed(), true)
-                        .addField(" VALUE", getCharacter().getInventory().getItemValuesForEmbed(), true)
-                        .addField(" WEIGHT", getCharacter().getInventory().getItemWeightsForEmbed(), true)
-                        //.addField("\u200B", "\u200B", false)
-                        //.addField("SUMMARY", "Total value: " + getCharacter().getInventory().getItemsValue() + " Total weight: " + getCharacter().getInventory().getItemsWeight(), false)
-                        .timestamp(Instant.now())
-                        .build();
-                sendMessage(getMessageChannel(), embed);
-            }
-
+            sendMessage(getMessageChannel(), "pong");
         }
     }
 }
 
+
 class CallI extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?i")){
+
             if (characterCheck()) {
-                EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
                         .color(Color.BLUE)
                         .title("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
                         .author(getUserName(), null, getUserAvatarUrl())
-                        //.author(getUserName(), "https://discord4j.com", "https://i.imgur.com/F9BhEoz.png")
-                        //.description("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
                         .thumbnail("https://openclipart.org/image/800px/330656")
-                        //.addField("field title", "value", false)
-                        //.addField("\u200B", "\u200B", false)
-                        .addField(" NAME", getCharacter().getInventory().getItemNamesForEmbed(), true)
-                        .addField(" VALUE", getCharacter().getInventory().getItemValuesForEmbed(), true)
-                        .addField(" WEIGHT", getCharacter().getInventory().getItemWeightsForEmbed(), true)
-                        //.addField("\u200B", "\u200B", false)
-                        //.addField("SUMMARY", "Total value: " + getCharacter().getInventory().getItemsValue() + " Total weight: " + getCharacter().getInventory().getItemsWeight(), false)
-                        .timestamp(Instant.now())
-                        .build();
-                sendMessage(getMessageChannel(), embed);
+                        .timestamp(Instant.now());
+                   for (EmbedPair embedPair : getCharacter().getInventory().getEmbedPairs()){
+                       embedBuilder.addField(embedPair.getName(), embedPair.getEmbed(), true);
+                   }
+                sendMessage(getMessageChannel(), embedBuilder.build());
             }
-
         }
     }
 }

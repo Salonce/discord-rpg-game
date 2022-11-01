@@ -39,6 +39,13 @@ abstract class Item{
     protected int getWeight(){return weight;}
     protected int getValue(){return value;}
     protected int getPrice(){ return getValue()*PRICE_MULTIPLICATOR; }
+
+    public String getItemEmbedInfo(){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("WEIGHT: " + this.weight)
+                .append("\nVALUE: " + this.value);
+        return stringBuilder.toString();
+    }
 }
 
 final class Money extends Item{

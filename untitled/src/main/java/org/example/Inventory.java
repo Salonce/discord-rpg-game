@@ -2,7 +2,26 @@ package org.example;
 
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+
+
+class EmbedPair{
+    private String name;
+    private String embed;
+
+    public EmbedPair(String name, String embed){
+        this.name = name;
+        this.embed = embed;
+    }
+    public String getName(){
+        return name;
+    }
+    public String getEmbed(){
+        return embed;
+    }
+}
+
 
 public class Inventory {
     public static int MAX_ITEM_NUMBER = 7;
@@ -39,13 +58,12 @@ public class Inventory {
         itemList.remove(item);
     }
 
-    public ArrayList<Item> getItemList(){ return itemList; }
-    public ArrayList<String> getItemNames(){
-        ArrayList<String> itemNames = new ArrayList<>();
+    public ArrayList<EmbedPair> getEmbedPairs(){
+        ArrayList<EmbedPair> newEmbedPairs = new ArrayList<>();
         for (Item item : itemList){
-            itemNames.add(item.getName());
+            newEmbedPairs.add(new EmbedPair(item.getName(), item.getItemEmbedInfo()));
         }
-        return itemNames;
+        return newEmbedPairs;
     }
     public int getItemsWeight(){
         int weight = 0;
@@ -54,7 +72,6 @@ public class Inventory {
         }
         return weight;
     }
-
     public int getItemsValue(){
         int value = 0;
         for (Item item : itemList){
@@ -62,7 +79,26 @@ public class Inventory {
         }
         return value;
     }
+    public ArrayList<String> getItemNamesWeightValues(){
+        ArrayList<String> itemNames = new ArrayList<>();
+        for (Item item : itemList){
+            itemNames.add(item.getName() + " (w: " + item.getWeight() + ", v: " + item.getValue() + ")");
+        }
+        return itemNames;
+    }
+}
 
+class InventoryFullException extends Exception{
+    public InventoryFullException(String message){
+        super(message);
+    };
+}
+
+
+
+/*
+LEGACY CONTENT
+    ////
     public String getItemNamesForEmbed(){
         StringBuilder stringBuilder = new StringBuilder();
         for (Item item : itemList){
@@ -104,17 +140,12 @@ public class Inventory {
         return stringBuilder.toString();
     }
 
-    public ArrayList<String> getItemNamesWeightValues(){
+        public ArrayList<Item> getItemList(){ return itemList; }
+    public ArrayList<String> getItemNames(){
         ArrayList<String> itemNames = new ArrayList<>();
         for (Item item : itemList){
-            itemNames.add(item.getName() + " (w: " + item.getWeight() + ", v: " + item.getValue() + ")");
+            itemNames.add(item.getName());
         }
         return itemNames;
     }
-}
-
-class InventoryFullException extends Exception{
-    public InventoryFullException(String message){
-        super(message);
-    };
-}
+ */
