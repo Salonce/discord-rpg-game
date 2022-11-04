@@ -42,6 +42,15 @@ class Equipment{
                 +handsEquipment.getDefence()
                 +feetEquipment.getDefence();
     }
+    public int getTotalAttack(){
+        return headEquipment.getAttack()
+                +torsoEquipment.getAttack()
+                +legsEquipment.getAttack()
+                +handsEquipment.getAttack()
+                +feetEquipment.getAttack()
+                +firstHandEquipment.getAttack()
+                +secondHandEquipment.getAttack();
+    }
     public int getTotalWeight(){
         return headEquipment.getWeight()
                 +torsoEquipment.getWeight()

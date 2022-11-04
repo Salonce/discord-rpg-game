@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 
 public class Inventory {
-    public static int MAX_ITEM_NUMBER = 7;
+    public static int MAX_ITEM_NUMBER = 10;
     //private int maxWeight;
     private ArrayList<Item> itemList;
 

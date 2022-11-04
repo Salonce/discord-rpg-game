@@ -90,6 +90,13 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
     protected static void sendMessage(MessageChannel messageChannel, EmbedCreateSpec embedMessage){
         messageChannel.createMessage(embedMessage).block();
     }
+    protected static String addSpaces(String string, int maxWidth){
+        StringBuilder stringBuilder = new StringBuilder(string);
+        while(stringBuilder.length() < maxWidth){
+            stringBuilder.append("\u2800");
+        }
+        return stringBuilder.toString();
+    }
 }
 
 
@@ -275,6 +282,7 @@ class CallPing extends AnsweringHelper{
 }
 
 class CallI extends AnsweringHelper{
+    final static int INV_MAX_CHAR = 15;
     public void processMessage(){
         if (getContent().equals("?i")){
             if (characterCheck()) {
@@ -285,7 +293,7 @@ class CallI extends AnsweringHelper{
                         .thumbnail("https://openclipart.org/image/800px/330656")
                         .timestamp(Instant.now());
                    for (EmbedPair embedPair : getCharacter().getInventory().getEmbedPairs()){
-                       embedBuilder.addField(embedPair.getName(), embedPair.getEmbed(), true);
+                       embedBuilder.addField(addSpaces(embedPair.getName(), INV_MAX_CHAR), embedPair.getEmbed(), true);
                    }
                 sendMessage(getMessageChannel(), embedBuilder.build());
             }
@@ -317,16 +325,17 @@ class CallLootChest extends AnsweringHelper{
 }
 
 class CallCooldowns extends AnsweringHelper{
+    final static int AP_MAX_CHAR = 20;
     public void processMessage(){
         if (getContent().equals("?ap")){
             if (characterCheck()) {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
                         .color(Color.BLUE)
                         .title("Action points")
-                        .addField("Available ", getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP, true)
-                        .addField("Recovery time ", String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME), true)
-                        .addField("Next AP in ", String.valueOf(getCharacter().getActionPoints().getFirstCD()), true)
-                        .addField("All AP in ", String.valueOf(getCharacter().getActionPoints().getLastCD()), true)
+                        .addField(addSpaces("Available", AP_MAX_CHAR), getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP, true)
+                        .addField(addSpaces("Recovery time", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME), true)
+                        .addField(addSpaces("Next AP in ", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().getFirstCD()), true)
+                        .addField(addSpaces("All AP in ", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().getLastCD()), true)
                         .author(getUserName(), null, getUserAvatarUrl())
                         //.thumbnail("https://openclipart.org/image/800px/330656")
                         .timestamp(Instant.now())
@@ -361,21 +370,24 @@ class CallShop extends AnsweringHelper{
 
 
 class CallEquipmentInfo extends AnsweringHelper{
+    final static int EQ_MAX_CHAR = 15;
     public void processMessage(){
         if (getContent().equals("?eq")){
             if (characterCheck()){
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
                         .color(Color.BLUE)
                         //.title("Action points")
-                        .addField("Head ", Equipment.getEmbedStats(getCharacter().getEquipment().getHeadEquipment()), true)
-                        .addField("Torso ", Equipment.getEmbedStats(getCharacter().getEquipment().getTorsoEquipment()), true)
+                        .addField(addSpaces("Head", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getHeadEquipment()), true)
+                        .addField(addSpaces("Torso", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getTorsoEquipment()), true)
                         //.addField("Legs ", Equipment.getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
-                        .addField("Legs ", Equipment.getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
-
-                        .addField("Feet ", Equipment.getEmbedStats(getCharacter().getEquipment().getFeetEquipment()), true)
-                        .addField("Hands ", Equipment.getEmbedStats(getCharacter().getEquipment().getHandsEquipment()), true)
-                        .addField("First hand ", Equipment.getEmbedStats(getCharacter().getEquipment().getFirstHandEquipment()), true)
-                        .addField("Second hand ", Equipment.getEmbedStats(getCharacter().getEquipment().getSecondHandEquipment()), true)
+                        .addField(addSpaces("Legs", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
+                        .addField(addSpaces("Feet", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getFeetEquipment()), true)
+                        .addField(addSpaces("Hands", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getHandsEquipment()), true)
+                        .addField(addSpaces("First hand", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getFirstHandEquipment()), true)
+                        .addField(addSpaces("Second hand", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getSecondHandEquipment()), true)
+                        .addField("Total", ":shield: " + getCharacter().getEquipment().getTotalDefence() + "\n:axe: " + getCharacter().getEquipment().getTotalAttack() + "\n:scales: " + getCharacter().getEquipment().getTotalWeight(), true)
+                        //.addField(addSpaces("Total attack", EQ_MAX_CHAR), String.valueOf(getCharacter().getEquipment().getTotalAttack()), true)
+                        //.addField(addSpaces("Total weight", EQ_MAX_CHAR), String.valueOf(getCharacter().getEquipment().getTotalWeight()), true)
                         .author(getUserName(), null, getUserAvatarUrl())
                         //.thumbnail("https://openclipart.org/image/800px/330656")
                         .timestamp(Instant.now())

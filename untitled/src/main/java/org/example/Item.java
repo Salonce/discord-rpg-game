@@ -73,8 +73,9 @@ abstract class Item{
 
     public String getItemEmbedInfo(){
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(":scales:: " + this.weight)
-                .append("\n:coin:: " + this.value);
+        stringBuilder.append(":coin:: " + this.value).
+                append("\n:scales:: " + this.weight);
+
         return stringBuilder.toString();
     }
 }
