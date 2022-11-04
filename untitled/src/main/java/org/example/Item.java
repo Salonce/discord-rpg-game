@@ -1,6 +1,8 @@
 package org.example;
 
 
+import java.util.NoSuchElementException;
+
 class ItemManager{
     //EQUIPMENT
     public final static Item STEEL_HELMET = new Helmet("Steel helmet", 3, 25, 3);
@@ -9,6 +11,7 @@ class ItemManager{
     public final static Item STEEL_GLOVES = new Gloves("Steel gloves", 3, 10, 3);
     public final static Item STEEL_BOOTS = new Boots("Steel boots", 4, 25, 3);
     public final static Item STEEL_SHIELD = new Shield("Steel shield", 5, 45, 6);
+    public final static Item DOLPHIN_SHIELD = new Shield("Dolphin shield", 3, 155, 16);
     public final static Item STEEL_SWORD = new Weapon("Steel sword", 3, 45, 10);
 
     //NON-EQUIPMENT
@@ -25,7 +28,8 @@ class ItemManager{
     public final static Item GOLD = new Money("Gold", 0, 0);
 
     //CRAFTING ITEMS
-    public final static Item DOLPHIN_FIN = new CraftingItem("Dolphin's fin :dolphin:", 2, 100);
+    public final static Item DOLPHIN_FIN = new CraftingItem("Dolphin's fin", 2, 100);
+    public final static Item SHEEP_WOOL = new CraftingItem("Sheep wool", 2, 100);
 }
 
 
@@ -69,14 +73,6 @@ abstract class Item{
         if (hasAttack())
             return attack;
         else return 0;
-    }
-
-    public String getItemEmbedInfo(){
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(":coin:: " + this.value).
-                append("\n:scales:: " + this.weight);
-
-        return stringBuilder.toString();
     }
 }
 
@@ -445,7 +441,11 @@ enum Wearable{
     NOTHING
 }
 
-
+class NoSuchItemException extends Exception{
+    public NoSuchItemException(){
+        super();
+    }
+}
 
 /*
 public class DefensiveItemBuilder<T extends DefensiveItem>{

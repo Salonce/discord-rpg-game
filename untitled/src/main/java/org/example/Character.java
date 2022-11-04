@@ -11,6 +11,7 @@ class Character implements Battleable{
         this.inventory = new Inventory();
         this.actionPoints = new ActionPoints();
         this.equipment = new Equipment();
+
     }
 
     private CharClass charClass;
@@ -20,6 +21,7 @@ class Character implements Battleable{
     private Equipment equipment;
     private Inventory inventory;
     private ActionPoints actionPoints;
+
 
     public CharClass getCharClass(){return charClass;}
     public CharRace getCharRace(){return charRace;}

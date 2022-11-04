@@ -1,7 +1,9 @@
 package org.example;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
@@ -33,6 +35,20 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
     private static String userName;
     private static String userNameId;
     private static String userAvatarUrl;
+    private static DiscordClient discordClient;
+
+
+    public User getUserBySnowflake(Snowflake id){
+        try{
+            return discordClient.getUserById(id).block();
+        } catch (Exception e){
+            System.out.println("exception when catching user");
+        }
+    }
+
+    public static void setDiscordClient(DiscordClient discordClient) {
+        AnsweringHelper.discordClient = discordClient;
+    }
 
     public static void setCharacterManager(CharacterManager characterManager) {
         AnsweringHelper.characterManager = characterManager;
@@ -100,6 +116,56 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
 }
 
 
+class CallGive extends AnsweringHelper{
+    public void processMessage(){
+        try{
+            String[] splitString = getContent().split(" ", 3);
+            if (splitString[0].equals("?give")){
+                try{
+                    String itemName = splitString[2];
+                    System.out.println(splitString[0] + " : " + (splitString[1]) + " : " + (splitString[2]));
+
+                    String firstId = getId().asString();
+                    System.out.println("first id: " + firstId);
+                    Snowflake secondId = Snowflake.of(splitString[1]);
+                    System.out.println("second id: " + secondId);
+                    Character receivingCharacter = getCharacterManager().getCharacterById(secondId);
+                    System.out.println("second character loaded");
+                    if (receivingCharacter == null){
+                        System.out.println("null char");
+                    }
+                    Item itemToMove = getCharacter().getInventory().getItemByName(itemName);
+
+                    User user;
+
+                    if (itemToMove == null)
+                        System.out.println("itemToEquip is == null");
+                    else if (itemToMove != null){
+                        System.out.println("itemToMove name: " + itemName);
+                        receivingCharacter.getInventory().addItem(itemToMove);
+                        System.out.println("added item " + itemToMove.getName() + " from " + secondId);
+                        getCharacter().getInventory().removeItem(itemToMove);
+                        System.out.println("removed item" + itemToMove.getName() + " from " + getUserName());
+                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                                .author(getUserName() + " gives " + itemToMove.getName() + " to " + "<@" + splitString[1] + ">", null, getUserAvatarUrl())
+                                .color(Color.RED)
+                                .build();
+                        sendMessage(getMessageChannel(), embed);
+                    }
+                } catch (NoSuchCharacterException ex) {
+                    sendMessage(getMessageChannel(), "Character doesn't exist!");
+                } catch (NumberFormatException e){
+                    sendMessage(getMessageChannel(), "Wrong ID");
+                } catch (InventoryFullException e) {
+                    sendMessage(getMessageChannel(), "Sorry! Can not do! Inventory of receiver is full.");
+                }
+            }
+        }
+        catch (Exception e){
+            sendMessage(getMessageChannel(),"some exception");
+        }
+    }
+}
 
 
 class CallCharTester extends AnsweringHelper{
@@ -112,6 +178,7 @@ class CallCharTester extends AnsweringHelper{
                      getCharacterManager().getCharacterById(getId()).getInventory().addItem(ItemManager.STEEL_SHIELD);
                      getCharacterManager().getCharacterById(getId()).getInventory().addItem(ItemManager.STEEL_ARMOR);
                      getCharacterManager().getCharacterById(getId()).getInventory().addItem(ItemManager.DOLPHIN_FIN);
+                     getCharacterManager().getCharacterById(getId()).getInventory().addItem(ItemManager.SHEEP_WOOL);
                      sendMessage(getMessageChannel(), "Creating a character for you... \nrace: "
                           + charRace.getName() + "...,\nclass: " + charClass.getName() + "... \nadding items ... done!");
             } catch(Exception IllegalArgumentException){}
@@ -216,7 +283,10 @@ class CallEquip extends AnsweringHelper{
                     Item itemToEquip = getCharacter().getInventory().getItemByName(itemName);
                     if (itemToEquip == null)
                         System.out.println("itemToEquip is == null");
-                    if (itemToEquip != null){
+                    //if (itemToEquip != null)
+                    if (itemToEquip != null && itemToEquip.getWearablePart() != Wearable.NOTHING){
+                        StringBuilder stringBuilder = new StringBuilder();
+
                         System.out.println("itemToEquip name: " + itemToEquip.getName());
                         Wearable wearable = itemToEquip.getWearablePart();
                         System.out.println("wearable to equip: " + wearable);
@@ -230,6 +300,42 @@ class CallEquip extends AnsweringHelper{
                             getCharacter().getInventory().addItem(itemToUnequip);
                             System.out.println("added to back to inventory: " + itemToUnequip.getName());
                         }
+                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                                .author(getUserName() + " equipped " + itemToEquip.getName(), null, getUserAvatarUrl())
+                                .color(Color.RED)
+                                .build();
+                        sendMessage(getMessageChannel(), embed);
+                    }
+                } catch (Exception e){
+                    sendMessage(getMessageChannel(), "Incorrect command!");
+                }
+            }
+        }
+        catch (Exception e){}
+    }
+}
+
+class CallDrop extends AnsweringHelper{
+    public void processMessage(){
+        try{
+            String[] splitString = getContent().split(" ", 2);
+            if (splitString[0].equals("?drop")){
+                try{
+                    String itemName = splitString[1];
+                    System.out.println(splitString[0] + " : " + (splitString[1]));
+                    Item itemToDrop = getCharacter().getInventory().getItemByName(itemName);
+                    if (itemToDrop == null)
+                        System.out.println("itemToDrop is == null");
+                    if (itemToDrop != null){
+                        StringBuilder stringBuilder = new StringBuilder();
+                        System.out.println("itemToDrop name: " + itemToDrop.getName());
+                        getCharacter().getInventory().removeItemByName(itemName);
+                        System.out.println("removed from Inventory: " + itemToDrop.getName());
+                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                                .author(getUserName() + " dropped " + itemToDrop.getName(), null, getUserAvatarUrl())
+                                .color(Color.RED)
+                                .build();
+                        sendMessage(getMessageChannel(), embed);
                     }
                 } catch (Exception e){
                     sendMessage(getMessageChannel(), "Incorrect command!");
@@ -262,6 +368,42 @@ class CallUnequip extends AnsweringHelper{
                             System.out.println("added to back to inventory: " + itemToUnequip.getName());
                             //what if inventory full?
                         }
+                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                                .author(getUserName() + " unequipped " + itemToUnequip.getName(), null, getUserAvatarUrl())
+                                .color(Color.RED)
+                                .build();
+                        sendMessage(getMessageChannel(), embed);
+                    }
+                } catch (Exception e){
+                    sendMessage(getMessageChannel(), "Incorrect command!");
+                }
+            }
+        }
+        catch (Exception e){}
+    }
+}
+
+class CallSell extends AnsweringHelper{
+    public void processMessage(){
+        try{
+            String[] splitString = getContent().split(" ", 2);
+            if (splitString[0].equalsIgnoreCase("?sell")){
+                try{
+                    String itemName = splitString[1];
+                    System.out.println(splitString[0] + " : " + (splitString[1]));
+                    Item itemToSell = getCharacter().getInventory().getItemByName(splitString[1]);
+                    if (itemToSell == null)
+                        System.out.println("itemToSell is == null");
+                    if (itemToSell != null){
+                        System.out.println("itemToSell name: " + itemToSell.getName());
+                        getCharacter().getInventory().removeItemByName(itemName);
+                        getCharacter().getInventory().setMoney(getCharacter().getInventory().getMoney() + itemToSell.getValue());
+                        System.out.println("removed from Inventory: " + itemToSell.getName());
+                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                                .author(getUserName() + " sold " + itemToSell.getName() + " for " + itemToSell.getValue(), null, getUserAvatarUrl())
+                                .color(Color.RED)
+                                .build();
+                        sendMessage(getMessageChannel(), embed);
                     }
                 } catch (Exception e){
                     sendMessage(getMessageChannel(), "Incorrect command!");
@@ -281,25 +423,7 @@ class CallPing extends AnsweringHelper{
     }
 }
 
-class CallI extends AnsweringHelper{
-    final static int INV_MAX_CHAR = 15;
-    public void processMessage(){
-        if (getContent().equals("?i")){
-            if (characterCheck()) {
-                EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
-                        .color(Color.BROWN)
-                        .title("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
-                        .author(getUserName(), null, getUserAvatarUrl())
-                        .thumbnail("https://openclipart.org/image/800px/330656")
-                        .timestamp(Instant.now());
-                   for (EmbedPair embedPair : getCharacter().getInventory().getEmbedPairs()){
-                       embedBuilder.addField(addSpaces(embedPair.getName(), INV_MAX_CHAR), embedPair.getEmbed(), true);
-                   }
-                sendMessage(getMessageChannel(), embedBuilder.build());
-            }
-        }
-    }
-}
+
 
 class CallLootChest extends AnsweringHelper{
     public void processMessage(){
@@ -368,27 +492,86 @@ class CallShop extends AnsweringHelper{
     }
 }
 
+class CallI extends AnsweringHelper{
+    final static int INV_MAX_CHAR = 15;
+    private String getItemInfo(Item item){
+        int empty = 0;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\n:coin: " + item.getValue());
+        stringBuilder.append("\n:scales: " + item.getWeight());
+        stringBuilder.append("\n\u2800");
+        if (item.hasAttack())
+            stringBuilder.append("\n:axe: " + item.getAttack());
+        else
+            empty++;
+        if (item.hasDefense()){
+            stringBuilder.append("\n:shield: " + item.getDefence());
+        } else
+            empty++;
+        int a = 0;
+        while (a < empty){
+            stringBuilder.append("\n\u2800");
+            a++;
+        }
+        return stringBuilder.toString();
+    }
+    public void processMessage(){
+        if (getContent().equals("?i")){
+            if (characterCheck()) {
+                EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
+                        .color(Color.BROWN)
+                        //.title("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
+                        .addField("Total"
+                                //, ":coin: " + getCharacter().getInventory().getItemsValue()
+                                , ":coin: " + getCharacter().getInventory().getMoney()
+                                        + " :scales: " + getCharacter().getInventory().getItemsWeight(), false)
+                        //.addField("Total"
+                        //        , ":coin: " + getCharacter().getInventory().getItemsValue()
+                        //        + "\n:scales: " + getCharacter().getInventory().getItemsWeight(), false)
+                        .author(getUserName() + " : Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")", null, getUserAvatarUrl())
+                        .thumbnail("https://openclipart.org/image/800px/330656");
+                //.timestamp(Instant.now());
+                for (Item item : getCharacter().getInventory().getItemList()){
+                    embedBuilder.addField(addSpaces(item.getName(), INV_MAX_CHAR), getItemInfo(item), true);
+                }
+                sendMessage(getMessageChannel(), embedBuilder.build());
+            }
+        }
+    }
+}
 
 class CallEquipmentInfo extends AnsweringHelper{
     final static int EQ_MAX_CHAR = 15;
+    private String getEmbedStats(Item item){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\n" + item.getName());
+        stringBuilder.append("\n:coin: " + item.getValue());
+        stringBuilder.append("\n:scales: " + item.getWeight());
+        if (item.hasAttack()){
+            stringBuilder.append("\n:axe: " + item.getAttack());
+        }
+        if (item.hasDefense()){
+            stringBuilder.append("\n:shield: " + item.getDefence());
+        }
+        return stringBuilder.toString();
+    }
     public void processMessage(){
         if (getContent().equals("?eq")){
             if (characterCheck()){
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
                         .color(Color.BLUE)
-                        //.title("Action points")
-                        .addField(addSpaces("Head", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getHeadEquipment()), true)
-                        .addField(addSpaces("Torso", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getTorsoEquipment()), true)
-                        //.addField("Legs ", Equipment.getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
-                        .addField(addSpaces("Legs", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
-                        .addField(addSpaces("Feet", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getFeetEquipment()), true)
-                        .addField(addSpaces("Hands", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getHandsEquipment()), true)
-                        .addField(addSpaces("First hand", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getFirstHandEquipment()), true)
-                        .addField(addSpaces("Second hand", EQ_MAX_CHAR), Equipment.getEmbedStats(getCharacter().getEquipment().getSecondHandEquipment()), true)
+                        //.title("Equipment")
+                        .addField(addSpaces("Head", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getHeadEquipment()), true)
+                        .addField(addSpaces("Torso", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getTorsoEquipment()), true)
+                        .addField(addSpaces("Legs", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
+                        .addField(addSpaces("Feet", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getFeetEquipment()), true)
+                        .addField(addSpaces("Hands", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getHandsEquipment()), true)
+                        .addField(addSpaces("First hand", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getFirstHandEquipment()), true)
+                        .addField(addSpaces("Second hand", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getSecondHandEquipment()), true)
                         .addField("Total", ":shield: " + getCharacter().getEquipment().getTotalDefence() + "\n:axe: " + getCharacter().getEquipment().getTotalAttack() + "\n:scales: " + getCharacter().getEquipment().getTotalWeight(), true)
                         //.addField(addSpaces("Total attack", EQ_MAX_CHAR), String.valueOf(getCharacter().getEquipment().getTotalAttack()), true)
                         //.addField(addSpaces("Total weight", EQ_MAX_CHAR), String.valueOf(getCharacter().getEquipment().getTotalWeight()), true)
-                        .author(getUserName(), null, getUserAvatarUrl())
+                        .author(getUserName() + " - Equipment", null, getUserAvatarUrl())
                         //.thumbnail("https://openclipart.org/image/800px/330656")
                         .timestamp(Instant.now())
                         .build();
@@ -398,24 +581,6 @@ class CallEquipmentInfo extends AnsweringHelper{
     }
 }
 
-/*
-class CallInventory extends AnsweringHelper{
-    public void processMessage(){
-        if (getContent().equals("?inventory")){
-            if (characterCheck()) {
-                StringBuilder inventoryNamesOutput = new StringBuilder(1023);
-                inventoryNamesOutput.append("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ") (w - weight, v - value): \n");
-                for (String string : getCharacter().getInventory().getItemNamesWeightValues()) {
-                    inventoryNamesOutput.append(string + ",\n");
-                }
-                inventoryNamesOutput.append("Total (w: " + getCharacter().getInventory().getItemsWeight());
-                inventoryNamesOutput.append(", v: " + getCharacter().getInventory().getItemsValue() + ")");
-                sendMessage(getMessageChannel(), inventoryNamesOutput.toString());
-            }
-        }
-    }
-}
- */
 
 class AnswerManager {
     private ArrayList<MessageProcessingMachine> messageProcessingArrayList = new ArrayList<>();
@@ -437,6 +602,9 @@ class AnswerManager {
         messageProcessingArrayList.add(new CallEquipmentInfo());
         messageProcessingArrayList.add(new CallEquip());
         messageProcessingArrayList.add(new CallUnequip());
+        messageProcessingArrayList.add(new CallDrop());
+        messageProcessingArrayList.add(new CallSell());
+        messageProcessingArrayList.add(new CallGive());
     }
 
     private boolean selfSending(Message message) {
@@ -563,10 +731,26 @@ class AnswerManager{
 }
 
 
+/*
+class CallInventory extends AnsweringHelper{
+    public void processMessage(){
+        if (getContent().equals("?inventory")){
+            if (characterCheck()) {
+                StringBuilder inventoryNamesOutput = new StringBuilder(1023);
+                inventoryNamesOutput.append("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ") (w - weight, v - value): \n");
+                for (String string : getCharacter().getInventory().getItemNamesWeightValues()) {
+                    inventoryNamesOutput.append(string + ",\n");
+                }
+                inventoryNamesOutput.append("Total (w: " + getCharacter().getInventory().getItemsWeight());
+                inventoryNamesOutput.append(", v: " + getCharacter().getInventory().getItemsValue() + ")");
+                sendMessage(getMessageChannel(), inventoryNamesOutput.toString());
+            }
+        }
+    }
+}
+ */
 
 
-
-*/
 
 
 

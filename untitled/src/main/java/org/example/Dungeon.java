@@ -21,10 +21,13 @@ class Chest implements Lootable{
     public ArrayList<Item> loot(){
         ArrayList<Item> newItems = new ArrayList<>();
 
-        Chancer.chanceItem(newItems, ItemManager.STEEL_HELMET, 30);
-        Chancer.chanceItem(newItems, ItemManager.STEEL_ARMOR, 30);
-        Chancer.chanceItem(newItems, ItemManager.STEEL_SHIELD, 30);
-        Chancer.chanceItem(newItems, ItemManager.DOLPHIN_FIN, 2);
+        Chancer.chanceItem(newItems, ItemManager.STEEL_SWORD, 60);
+        Chancer.chanceItem(newItems, ItemManager.STEEL_HELMET, 20);
+        Chancer.chanceItem(newItems, ItemManager.STEEL_ARMOR, 20);
+        Chancer.chanceItem(newItems, ItemManager.STEEL_SHIELD, 60);
+        Chancer.chanceItem(newItems, ItemManager.DOLPHIN_SHIELD, 60);
+        Chancer.chanceItem(newItems, ItemManager.DOLPHIN_FIN, 25);
+        Chancer.chanceItem(newItems, ItemManager.SHEEP_WOOL, 25);
         return newItems;
     }
 }

@@ -16,7 +16,9 @@ public class Main {
         final Shop basicShop = new BasicShop();
 
         AnsweringHelper.setCharacterManager(characterManager);
+        AnsweringHelper.setDiscordClient(client);
         AnsweringHelper.setShops(basicShop);
+
 
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
             answerManager.process(event.getMessage());

@@ -61,22 +61,6 @@ class Equipment{
                 +secondHandEquipment.getWeight();
     }
 
-    public static String getEmbedStats(Item item){
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("\n" + item.getName());
-        stringBuilder.append("\n:coin: " + item.getValue());
-        stringBuilder.append("\n:scales: " + item.getWeight());
-        //stringBuilder.append("\nPrice: " + item.getPrice());
-        if (item.hasAttack()){
-            stringBuilder.append("\n:axe: " + item.getAttack());
-        }
-        if (item.hasDefense()){
-            stringBuilder.append("\n:shield: " + item.getDefence());
-        }
-        return stringBuilder.toString();
-    }
-
-
     public void equipItem(Item item){
         if (item.getWearablePart() == Wearable.HEAD){
             headEquipment = item;
@@ -102,25 +86,25 @@ class Equipment{
     }
 
     public Item getItemByName(String name){
-        if (headEquipment.getName().equals(name)){
+        if (headEquipment.getName().equalsIgnoreCase(name)){
             return headEquipment;
         }
-        else if (torsoEquipment.getName().equals(name)){
+        else if (torsoEquipment.getName().equalsIgnoreCase(name)){
             return torsoEquipment;
         }
-        else if (legsEquipment.getName().equals(name)){
+        else if (legsEquipment.getName().equalsIgnoreCase(name)){
             return legsEquipment;
         }
-        else if (handsEquipment.getName().equals(name)){
+        else if (handsEquipment.getName().equalsIgnoreCase(name)){
             return handsEquipment;
         }
-        else if (feetEquipment.getName().equals(name)){
+        else if (feetEquipment.getName().equalsIgnoreCase(name)){
             return feetEquipment;
         }
-        else if (firstHandEquipment.getName().equals(name)){
+        else if (firstHandEquipment.getName().equalsIgnoreCase(name)){
             return firstHandEquipment;
         }
-        else if (secondHandEquipment.getName().equals(name)){
+        else if (secondHandEquipment.getName().equalsIgnoreCase(name)){
             return secondHandEquipment;
         }
         else return null;
@@ -153,31 +137,31 @@ class Equipment{
 
 
     public boolean removeItemByName(String name){
-        if (headEquipment.getName().equals(name)){
+        if (headEquipment.getName().equalsIgnoreCase(name)){
             this.headEquipment = ItemManager.NO_HELMET;
             return true;
         }
-        else if (torsoEquipment.getName().equals(name)){
+        else if (torsoEquipment.getName().equalsIgnoreCase(name)){
             this.torsoEquipment = ItemManager.NO_ARMOR;
             return true;
         }
-        else if (legsEquipment.getName().equals(name)){
+        else if (legsEquipment.getName().equalsIgnoreCase(name)){
             this.legsEquipment = ItemManager.NO_TROUSERS;
             return true;
         }
-        else if (handsEquipment.getName().equals(name)){
+        else if (handsEquipment.getName().equalsIgnoreCase(name)){
             this.handsEquipment = ItemManager.NO_GLOVES;
             return true;
         }
-        else if (feetEquipment.getName().equals(name)){
+        else if (feetEquipment.getName().equalsIgnoreCase(name)){
             this.feetEquipment = ItemManager.NO_BOOTS;
             return true;
         }
-        else if (firstHandEquipment.getName().equals(name)){
+        else if (firstHandEquipment.getName().equalsIgnoreCase(name)){
             this.firstHandEquipment = ItemManager.NO_WEAPON;
             return true;
         }
-        else if (secondHandEquipment.getName().equals(name)){
+        else if (secondHandEquipment.getName().equalsIgnoreCase(name)){
             this.secondHandEquipment = ItemManager.NO_SHIELD;
             return true;
         }

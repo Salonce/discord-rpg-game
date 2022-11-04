@@ -7,15 +7,30 @@ import java.util.Iterator;
 
 public class Inventory {
     public static int MAX_ITEM_NUMBER = 10;
-    //private int maxWeight;
+
     private ArrayList<Item> itemList;
+    //private int maxWeight;
+
+    private int money;
+    public int getMoney(){return money;}
+    public void setMoney(int money){
+        this.money = money;
+    }
 
     public Inventory(){
         itemList = new ArrayList<>();
+        this.money = 0;
     }
     public int getSize(){
         return itemList.size();
     }
+
+    public boolean isFreeSpace(){
+        if (itemList.size() < MAX_ITEM_NUMBER)
+            return true;
+        else return false;
+    }
+
     public void addItem(Item item) throws InventoryFullException {
         int itemsnumber = itemList.size();
         if (itemsnumber < MAX_ITEM_NUMBER) {
@@ -40,24 +55,20 @@ public class Inventory {
         itemList.remove(item);
     }
 
-    public ArrayList<EmbedPair> getEmbedPairs(){
-        ArrayList<EmbedPair> newEmbedPairs = new ArrayList<>();
-        for (Item item : itemList){
-            newEmbedPairs.add(new EmbedPair(item.getName(), item.getItemEmbedInfo()));
-        }
-        return newEmbedPairs;
+    public ArrayList<Item> getItemList(){
+        return itemList;
     }
     public int getItemsWeight(){
         int weight = 0;
         for (Item item : itemList){
-            weight = weight + item.getWeight();
+            weight += item.getWeight();
         }
         return weight;
     }
     public int getItemsValue(){
         int value = 0;
         for (Item item : itemList){
-            value = value + item.getValue();
+            value += item.getValue();
         }
         return value;
     }
@@ -65,7 +76,7 @@ public class Inventory {
     public Item getItemByName(String name){
         int i = 0;
         while(i < itemList.size()){
-            if (itemList.get(i).getName().equals(name)){
+            if (itemList.get(i).getName().equalsIgnoreCase(name)){
                 return itemList.get(i);
             }
             else{
@@ -78,7 +89,7 @@ public class Inventory {
     public void removeItemByName(String name){
         int i = 0;
         while(i < itemList.size()){
-            if (itemList.get(i).getName().equals(name)){
+            if (itemList.get(i).getName().equalsIgnoreCase(name)){
                 itemList.remove(i);
                 i = itemList.size();
                 //itemList.trimToSize();
@@ -89,33 +100,8 @@ public class Inventory {
         }
     }
 
-
-    /*
-    public ArrayList<String> getItemNamesWeightValues(){
-        ArrayList<String> itemNames = new ArrayList<>();
-        for (Item item : itemList){
-            itemNames.add(item.getName() + " (w: " + item.getWeight() + ", v: " + item.getValue() + ")");
-        }
-        return itemNames;
-    }
-     */
 }
 
-class EmbedPair{
-    private String name;
-    private String embed;
-
-    public EmbedPair(String name, String embed){
-        this.name = name;
-        this.embed = embed;
-    }
-    public String getName(){
-        return name;
-    }
-    public String getEmbed(){
-        return embed;
-    }
-}
 
 class InventoryFullException extends Exception{
     public InventoryFullException(String message){
@@ -126,6 +112,7 @@ class InventoryFullException extends Exception{
 
 
 /*
+
 LEGACY CONTENT
     ////
     public String getItemNamesForEmbed(){
@@ -174,6 +161,16 @@ LEGACY CONTENT
         ArrayList<String> itemNames = new ArrayList<>();
         for (Item item : itemList){
             itemNames.add(item.getName());
+        }
+        return itemNames;
+    }
+
+
+    /*
+    public ArrayList<String> getItemNamesWeightValues(){
+        ArrayList<String> itemNames = new ArrayList<>();
+        for (Item item : itemList){
+            itemNames.add(item.getName() + " (w: " + item.getWeight() + ", v: " + item.getValue() + ")");
         }
         return itemNames;
     }
