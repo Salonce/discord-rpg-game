@@ -14,6 +14,7 @@ public class Main {
         final AnswerManager answerManager = new AnswerManager();
         final CharacterManager characterManager = new CharacterManager();
         final Shop basicShop = new BasicShop();
+
         AnsweringHelper.setCharacterManager(characterManager);
         AnsweringHelper.setShops(basicShop);
 

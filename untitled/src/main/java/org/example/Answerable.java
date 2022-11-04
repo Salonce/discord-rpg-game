@@ -107,11 +107,7 @@ class CallCharTester extends AnsweringHelper{
                      getCharacterManager().getCharacterById(getId()).getInventory().addItem(ItemManager.DOLPHIN_FIN);
                      sendMessage(getMessageChannel(), "Creating a character for you... \nrace: "
                           + charRace.getName() + "...,\nclass: " + charClass.getName() + "... \nadding items ... done!");
-            } catch(Exception e){
-                if (e instanceof IllegalArgumentException){
-                    System.out.println(e.toString());
-                }
-            }
+            } catch(Exception IllegalArgumentException){}
         }
     }
 }
@@ -141,23 +137,26 @@ class CallExperience extends AnsweringHelper{
     }
 }
 
-class CallRace extends AnsweringHelper{
+class CallCharInfo extends AnsweringHelper{
     public void processMessage(){
-        if (getContent().equals("?race")){
-            if (characterCheck())
-                sendMessage(getMessageChannel(), getCharacter().getCharRace().getName());
+        if (getContent().equals("?charinfo")){
+            if (characterCheck()){
+                EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                        .color(Color.BLUE)
+                        //.title("Action points")
+                        .addField("Class ", getCharacter().getCharClass().getName(), true)
+                        .addField("Race ", getCharacter().getCharRace().getName(), true)
+                        .addField("Action Points ", String.valueOf(getCharacter().getActionPoints().getCurrentAP()) + "/" + ActionPoints.MAX_AP, true)
+                        .author(getUserName(), null, getUserAvatarUrl())
+                        //.thumbnail("https://openclipart.org/image/800px/330656")
+                        .timestamp(Instant.now())
+                        .build();
+                sendMessage(getMessageChannel(), embed);
+            }
         }
     }
 }
 
-class CallClass extends AnsweringHelper{
-    public void processMessage(){
-        if (getContent().equals("?class")){
-            if (characterCheck())
-                sendMessage(getMessageChannel(), getCharacter().getCharClass().getName());
-        }
-    }
-}
 
 class CallBodyParts extends AnsweringHelper{
     public void processMessage(){
@@ -183,6 +182,7 @@ class CallCreateCharacter extends AnsweringHelper{
                         sendMessage(getMessageChannel(), "Creating a character for you... race: "
                              + charRace.getName() + "..., class: " + charClass.getName() + "... done!");
                     }
+
                 } catch (IllegalCharacterClassException e) {
                     sendMessage(getMessageChannel(), "Incorrect creation command! Illegal class name! Try:\n?'create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
                 } catch (IllegalCharacterRaceException e){
@@ -198,22 +198,73 @@ class CallCreateCharacter extends AnsweringHelper{
     }
 }
 
-class CallInventory extends AnsweringHelper{
+class CallEquip extends AnsweringHelper{
     public void processMessage(){
-        if (getContent().equals("?inventory")){
-            if (characterCheck()) {
-                StringBuilder inventoryNamesOutput = new StringBuilder(1023);
-                inventoryNamesOutput.append("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ") (w - weight, v - value): \n");
-                for (String string : getCharacter().getInventory().getItemNamesWeightValues()) {
-                    inventoryNamesOutput.append(string + ",\n");
+        try{
+            String[] splitString = getContent().split(" ", 2);
+            if (splitString[0].equals("?equip")){
+                try{
+                    String itemName = splitString[1];
+                    System.out.println(splitString[0] + " : " + (splitString[1]));
+                    Item itemToEquip = getCharacter().getInventory().getItemByName(itemName);
+                    if (itemToEquip == null)
+                        System.out.println("itemToEquip is == null");
+                    if (itemToEquip != null){
+                        System.out.println("itemToEquip name: " + itemToEquip.getName());
+                        Wearable wearable = itemToEquip.getWearablePart();
+                        System.out.println("wearable to equip: " + wearable);
+                        Item itemToUnequip = getCharacter().getEquipment().getItemByWearable(wearable);
+                        System.out.println("item to unequip: " + itemToUnequip.getName());
+                        getCharacter().getEquipment().equipItem(itemToEquip);
+                        System.out.println("equipped: " + itemToEquip.getName());
+                        getCharacter().getInventory().removeItemByName(itemName);
+                        System.out.println("removed from Inventory: " + itemToEquip.getName());
+                        if (!itemToUnequip.isEmptyEquipment()) {
+                            getCharacter().getInventory().addItem(itemToUnequip);
+                            System.out.println("added to back to inventory: " + itemToUnequip.getName());
+                        }
+                    }
+                } catch (Exception e){
+                    sendMessage(getMessageChannel(), "Incorrect command!");
                 }
-                inventoryNamesOutput.append("Total (w: " + getCharacter().getInventory().getItemsWeight());
-                inventoryNamesOutput.append(", v: " + getCharacter().getInventory().getItemsValue() + ")");
-                sendMessage(getMessageChannel(), inventoryNamesOutput.toString());
             }
         }
+        catch (Exception e){}
     }
 }
+
+class CallUnequip extends AnsweringHelper{
+    public void processMessage(){
+        try{
+            String[] splitString = getContent().split(" ", 2);
+            if (splitString[0].equals("?unequip")){
+                try{
+                    String itemName = splitString[1];
+                    System.out.println(splitString[0] + " : " + (splitString[1]));
+                    Item itemToUnequip = getCharacter().getEquipment().getItemByName(itemName);
+                    if (itemToUnequip == null)
+                        System.out.println("itemToEquip is == null");
+                    if (itemToUnequip != null){
+                        System.out.println("itemToUnequip name: " + itemName);
+                        if (itemToUnequip.isEmptyEquipment()) {
+                            System.out.println("no-equipment item, doing nothing...");
+                        }
+                        if (!itemToUnequip.isEmptyEquipment()) {
+                            getCharacter().getEquipment().removeItemByName(itemName);
+                            getCharacter().getInventory().addItem(itemToUnequip);
+                            System.out.println("added to back to inventory: " + itemToUnequip.getName());
+                            //what if inventory full?
+                        }
+                    }
+                } catch (Exception e){
+                    sendMessage(getMessageChannel(), "Incorrect command!");
+                }
+            }
+        }
+        catch (Exception e){}
+    }
+}
+
 
 class CallPing extends AnsweringHelper{
     public void processMessage(){
@@ -223,14 +274,12 @@ class CallPing extends AnsweringHelper{
     }
 }
 
-
 class CallI extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?i")){
-
             if (characterCheck()) {
                 EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
-                        .color(Color.BLUE)
+                        .color(Color.BROWN)
                         .title("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
                         .author(getUserName(), null, getUserAvatarUrl())
                         .thumbnail("https://openclipart.org/image/800px/330656")
@@ -271,6 +320,20 @@ class CallCooldowns extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?ap")){
             if (characterCheck()) {
+                EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                        .color(Color.BLUE)
+                        .title("Action points")
+                        .addField("Available ", getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP, true)
+                        .addField("Recovery time ", String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME), true)
+                        .addField("Next AP in ", String.valueOf(getCharacter().getActionPoints().getFirstCD()), true)
+                        .addField("All AP in ", String.valueOf(getCharacter().getActionPoints().getLastCD()), true)
+                        .author(getUserName(), null, getUserAvatarUrl())
+                        //.thumbnail("https://openclipart.org/image/800px/330656")
+                        .timestamp(Instant.now())
+                        .build();
+                sendMessage(getMessageChannel(), embed);
+
+                /*
                 //AP taken without checks yet
                 sendMessage(getMessageChannel(), "Action points: " + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP
                         //+ ".\nCooldowns (seconds): " + getCharacter().getActionPoints().getStringCooldowns()
@@ -278,7 +341,7 @@ class CallCooldowns extends AnsweringHelper{
                         + ".\nAction points available in: " + getCharacter().getActionPoints().getFirstCD() + " (next), "
                         + getCharacter().getActionPoints().getLastCD() + " (all)."
                         //+ ".\nAll AP available in: " + getCharacter().getActionPoints().getLastCD()
-                );
+                 */
 
 
             }
@@ -296,6 +359,52 @@ class CallShop extends AnsweringHelper{
     }
 }
 
+
+class CallEquipmentInfo extends AnsweringHelper{
+    public void processMessage(){
+        if (getContent().equals("?eq")){
+            if (characterCheck()){
+                EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                        .color(Color.BLUE)
+                        //.title("Action points")
+                        .addField("Head ", Equipment.getEmbedStats(getCharacter().getEquipment().getHeadEquipment()), true)
+                        .addField("Torso ", Equipment.getEmbedStats(getCharacter().getEquipment().getTorsoEquipment()), true)
+                        //.addField("Legs ", Equipment.getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
+                        .addField("Legs ", Equipment.getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
+
+                        .addField("Feet ", Equipment.getEmbedStats(getCharacter().getEquipment().getFeetEquipment()), true)
+                        .addField("Hands ", Equipment.getEmbedStats(getCharacter().getEquipment().getHandsEquipment()), true)
+                        .addField("First hand ", Equipment.getEmbedStats(getCharacter().getEquipment().getFirstHandEquipment()), true)
+                        .addField("Second hand ", Equipment.getEmbedStats(getCharacter().getEquipment().getSecondHandEquipment()), true)
+                        .author(getUserName(), null, getUserAvatarUrl())
+                        //.thumbnail("https://openclipart.org/image/800px/330656")
+                        .timestamp(Instant.now())
+                        .build();
+                sendMessage(getMessageChannel(), embed);
+            }
+        }
+    }
+}
+
+/*
+class CallInventory extends AnsweringHelper{
+    public void processMessage(){
+        if (getContent().equals("?inventory")){
+            if (characterCheck()) {
+                StringBuilder inventoryNamesOutput = new StringBuilder(1023);
+                inventoryNamesOutput.append("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ") (w - weight, v - value): \n");
+                for (String string : getCharacter().getInventory().getItemNamesWeightValues()) {
+                    inventoryNamesOutput.append(string + ",\n");
+                }
+                inventoryNamesOutput.append("Total (w: " + getCharacter().getInventory().getItemsWeight());
+                inventoryNamesOutput.append(", v: " + getCharacter().getInventory().getItemsValue() + ")");
+                sendMessage(getMessageChannel(), inventoryNamesOutput.toString());
+            }
+        }
+    }
+}
+ */
+
 class AnswerManager {
     private ArrayList<MessageProcessingMachine> messageProcessingArrayList = new ArrayList<>();
 
@@ -304,16 +413,18 @@ class AnswerManager {
         messageProcessingArrayList.add(new CallCreation());
         messageProcessingArrayList.add(new CallPing());
         messageProcessingArrayList.add(new CallExperience());
-        messageProcessingArrayList.add(new CallRace());
-        messageProcessingArrayList.add(new CallClass());
         messageProcessingArrayList.add(new CallCreateCharacter());
         messageProcessingArrayList.add(new CallBodyParts());
-        messageProcessingArrayList.add(new CallInventory());
+        //messageProcessingArrayList.add(new CallInventory());
         messageProcessingArrayList.add(new CallLootChest());
         messageProcessingArrayList.add(new CallCharTester());
         messageProcessingArrayList.add(new CallCooldowns());
         messageProcessingArrayList.add(new CallShop());
         messageProcessingArrayList.add(new CallI());
+        messageProcessingArrayList.add(new CallCharInfo());
+        messageProcessingArrayList.add(new CallEquipmentInfo());
+        messageProcessingArrayList.add(new CallEquip());
+        messageProcessingArrayList.add(new CallUnequip());
     }
 
     private boolean selfSending(Message message) {

@@ -3,6 +3,12 @@ package org.example;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+
+class ShopManager{
+
+}
+
+
 public abstract class Shop {
     protected ArrayList<Item> itemsOnSale;
     abstract public String itemsAvailable();

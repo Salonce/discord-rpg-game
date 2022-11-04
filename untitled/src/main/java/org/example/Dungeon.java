@@ -24,7 +24,7 @@ class Chest implements Lootable{
         Chancer.chanceItem(newItems, ItemManager.STEEL_HELMET, 30);
         Chancer.chanceItem(newItems, ItemManager.STEEL_ARMOR, 30);
         Chancer.chanceItem(newItems, ItemManager.STEEL_SHIELD, 30);
-        Chancer.chanceItem(newItems, ItemManager.DOLPHIN_FIN, 10);
+        Chancer.chanceItem(newItems, ItemManager.DOLPHIN_FIN, 2);
         return newItems;
     }
 }

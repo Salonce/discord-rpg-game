@@ -1,26 +1,8 @@
 package org.example;
 
-import java.awt.event.ItemEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 
-
-class EmbedPair{
-    private String name;
-    private String embed;
-
-    public EmbedPair(String name, String embed){
-        this.name = name;
-        this.embed = embed;
-    }
-    public String getName(){
-        return name;
-    }
-    public String getEmbed(){
-        return embed;
-    }
-}
 
 
 public class Inventory {
@@ -79,12 +61,59 @@ public class Inventory {
         }
         return value;
     }
+
+    public Item getItemByName(String name){
+        int i = 0;
+        while(i < itemList.size()){
+            if (itemList.get(i).getName().equals(name)){
+                return itemList.get(i);
+            }
+            else{
+                i++;
+            }
+        }
+        return null;
+    }
+
+    public void removeItemByName(String name){
+        int i = 0;
+        while(i < itemList.size()){
+            if (itemList.get(i).getName().equals(name)){
+                itemList.remove(i);
+                i = itemList.size();
+                //itemList.trimToSize();
+            }
+            else{
+                i++;
+            }
+        }
+    }
+
+
+    /*
     public ArrayList<String> getItemNamesWeightValues(){
         ArrayList<String> itemNames = new ArrayList<>();
         for (Item item : itemList){
             itemNames.add(item.getName() + " (w: " + item.getWeight() + ", v: " + item.getValue() + ")");
         }
         return itemNames;
+    }
+     */
+}
+
+class EmbedPair{
+    private String name;
+    private String embed;
+
+    public EmbedPair(String name, String embed){
+        this.name = name;
+        this.embed = embed;
+    }
+    public String getName(){
+        return name;
+    }
+    public String getEmbed(){
+        return embed;
     }
 }
 
