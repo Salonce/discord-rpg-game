@@ -19,8 +19,6 @@ class Equipment{
         this.feetEquipment = ItemManager.NO_BOOTS;
         this.firstHandEquipment = ItemManager.NO_WEAPON;
         this.secondHandEquipment = ItemManager.NO_SHIELD;
-
-
     }
 
     private ArrayList<Item> getEquipmentList(){
@@ -40,7 +38,9 @@ class Equipment{
                 +torsoEquipment.getDefence()
                 +legsEquipment.getDefence()
                 +handsEquipment.getDefence()
-                +feetEquipment.getDefence();
+                +feetEquipment.getDefence()
+                +firstHandEquipment.getDefence()
+                +secondHandEquipment.getDefence();
     }
     public int getTotalAttack(){
         return headEquipment.getAttack()
@@ -135,7 +135,6 @@ class Equipment{
         else return null;
     }
 
-
     public boolean removeItemByName(String name){
         if (headEquipment.getName().equalsIgnoreCase(name)){
             this.headEquipment = ItemManager.NO_HELMET;
@@ -171,57 +170,23 @@ class Equipment{
     public Item getHeadEquipment() {
         return headEquipment;
     }
-
-    public void setHeadEquipment(Item headEquipment) {
-        this.headEquipment = headEquipment;
-    }
-
     public Item getTorsoEquipment() {
         return torsoEquipment;
     }
-
-    public void setTorsoEquipment(Item torsoEquipment) {
-        this.torsoEquipment = torsoEquipment;
-    }
-
     public Item getLegsEquipment() {
         return legsEquipment;
     }
-
-    public void setLegsEquipment(Item legsEquipment) {
-        this.legsEquipment = legsEquipment;
-    }
-
     public Item getHandsEquipment() {
         return handsEquipment;
     }
-
-    public void setHandsEquipment(Item handsEquipment) {
-        this.handsEquipment = handsEquipment;
-    }
-
     public Item getFeetEquipment() {
         return feetEquipment;
     }
-
-    public void setFeetEquipment(Item bootsEquipment) {
-        this.feetEquipment = bootsEquipment;
-    }
-
     public Item getFirstHandEquipment() {
         return firstHandEquipment;
     }
-
-    public void setFirstHandEquipment(Item firstHandEquipment) {
-        this.firstHandEquipment = firstHandEquipment;
-    }
-
     public Item getSecondHandEquipment() {
         return secondHandEquipment;
-    }
-
-    public void setSecondHandEquipment(Item secondHandEquipment) {
-        this.secondHandEquipment = secondHandEquipment;
     }
 }
 

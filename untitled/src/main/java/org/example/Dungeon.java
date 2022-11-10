@@ -11,6 +11,12 @@ abstract class Chancer{
             newItems.add(item);
         }
     }
+    public static Item drawItem(Item item, int probability){
+        if (random.nextInt(100) < probability)
+            return item;
+        else
+            return null;
+    }
 }
 
 interface Lootable{
@@ -53,11 +59,3 @@ class LootingHelper{
         return fullList;
     }
 }
-
-/*
-class DungeonManager{}
-public class Dungeon implements Lootable {
-    ArrayList<Item> loot(){
-    };
-}
-*/

@@ -6,6 +6,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.entity.RestUser;
 import discord4j.rest.util.Color;
 
 import java.time.Instant;
@@ -38,12 +39,15 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
     private static DiscordClient discordClient;
 
 
-    public User getUserBySnowflake(Snowflake id){
+    public String getUsernameBySnowflake(Snowflake id){
+        StringBuilder stringBuilder = new StringBuilder();
         try{
-            return discordClient.getUserById(id).block();
+            discordClient.getUserById(id).getData().subscribe(data -> {stringBuilder.append(data.username());});
+            return stringBuilder.toString();
         } catch (Exception e){
             System.out.println("exception when catching user");
         }
+        return null;
     }
 
     public static void setDiscordClient(DiscordClient discordClient) {
@@ -147,7 +151,8 @@ class CallGive extends AnsweringHelper{
                         getCharacter().getInventory().removeItem(itemToMove);
                         System.out.println("removed item" + itemToMove.getName() + " from " + getUserName());
                         EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                                .author(getUserName() + " gives " + itemToMove.getName() + " to " + "<@" + splitString[1] + ">", null, getUserAvatarUrl())
+                                //secondId can be null
+                                .author(getUserName() + " gives " + itemToMove.getName() + " to " + getUsernameBySnowflake(secondId), null, getUserAvatarUrl())
                                 .color(Color.RED)
                                 .build();
                         sendMessage(getMessageChannel(), embed);
@@ -158,6 +163,8 @@ class CallGive extends AnsweringHelper{
                     sendMessage(getMessageChannel(), "Wrong ID");
                 } catch (InventoryFullException e) {
                     sendMessage(getMessageChannel(), "Sorry! Can not do! Inventory of receiver is full.");
+                } catch (NullPointerException e){
+                    sendMessage(getMessageChannel(), "Sorry! Something went wrong with receiver's name");
                 }
             }
         }
@@ -187,9 +194,35 @@ class CallCharTester extends AnsweringHelper{
 }
 
 class CallHelp extends AnsweringHelper{
+    private String getHelp(){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("?help")
+                .append("\n?tester")
+                .append("\n?create")
+                .append("\n?give")
+                .append("\n?eq")
+                .append("\n?i")
+                .append("\n?drop")
+                .append("\n?equip")
+                .append("\n?unequip")
+                .append("\n?ap")
+                .append("\n?forest");
+
+        return stringBuilder.toString();
+    }
     public void processMessage(){
         if (getContent().equals("?help")){
-            sendMessage(getMessageChannel(), "Available commands: ?help, ?created, ?ping, ?eq, :dolphin:");
+            if (characterCheck()){
+                EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                        .color(Color.BLUE)
+                        .title("Available commands")
+                        .addField("...", getHelp(), false)
+                        .author(getUserName(), null, getUserAvatarUrl())
+                        //.thumbnail("https://openclipart.org/image/800px/330656")
+                        .timestamp(Instant.now())
+                        .build();
+                sendMessage(getMessageChannel(), embed);
+            }
         }
     }
 }
@@ -198,15 +231,6 @@ class CallCreation extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?created")){
             sendMessage(getMessageChannel(), "The bot was created in 2022!");
-        }
-    }
-}
-
-
-class CallExperience extends AnsweringHelper{
-    public void processMessage(){
-        if (getContent().equals("?exp")){
-            sendMessage(getMessageChannel(), "0");
         }
     }
 }
@@ -220,6 +244,7 @@ class CallCharInfo extends AnsweringHelper{
                         //.title("Action points")
                         .addField("Class ", getCharacter().getCharClass().getName(), true)
                         .addField("Race ", getCharacter().getCharRace().getName(), true)
+                        .addField("Combatpower ", String.valueOf(getCharacter().getCombatPower()), true)
                         .addField("Action Points ", String.valueOf(getCharacter().getActionPoints().getCurrentAP()) + "/" + ActionPoints.MAX_AP, true)
                         .author(getUserName(), null, getUserAvatarUrl())
                         //.thumbnail("https://openclipart.org/image/800px/330656")
@@ -232,18 +257,15 @@ class CallCharInfo extends AnsweringHelper{
 }
 
 
-class CallBodyParts extends AnsweringHelper{
-    public void processMessage(){
-        if (getContent().equals("?bodyparts")){
-            if (characterCheck())
-                sendMessage(getMessageChannel(), getCharacter().getBody().getHead().getBodyPartName() + ", " + getCharacter().getBody().getTorso().getBodyPartName()
-                        + ", " + getCharacter().getBody().getLegs().getBodyPartName() + ", " + getCharacter().getBody().getFeet().getBodyPartName());
-        }
-    }
-}
-
 class CallCreateCharacter extends AnsweringHelper{
     public void processMessage(){
+
+
+        EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
+                .color(Color.BLUE)
+                .author(getUserName(), null, getUserAvatarUrl())
+                .timestamp(Instant.now());
+
         try{
             String[] splitString = getContent().split(" ");
             if (splitString[0].equals("?create")){
@@ -253,22 +275,23 @@ class CallCreateCharacter extends AnsweringHelper{
 
                     if (characterNegativeCheck()){
                         getCharacterManager().createNewCharacter(getId(), charClass, charRace);
-                        sendMessage(getMessageChannel(), "Creating a character for you... race: "
-                             + charRace.getName() + "..., class: " + charClass.getName() + "... done!");
+                        embedBuilder.title("Character creation")
+                                .addField("Class", charClass.getName(), true)
+                                .addField("Race", charRace.getName(), true);
                     }
-
                 } catch (IllegalCharacterClassException e) {
-                    sendMessage(getMessageChannel(), "Incorrect creation command! Illegal class name! Try:\n?'create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
+                    embedBuilder.title("Illegal class name! Try:\n?'create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
                 } catch (IllegalCharacterRaceException e){
-                        sendMessage(getMessageChannel(), "Incorrect creation command!  Illegal race name! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
+                    embedBuilder.title("Illegal race name! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
                 } catch (ArrayIndexOutOfBoundsException e){
-                        sendMessage(getMessageChannel(), "Incorrect creation command! Not enough arguments! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
+                    embedBuilder.title("Not enough arguments! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
                 } catch (Exception e){
-                    sendMessage(getMessageChannel(), "Incorrect command! Try:\n?create <class> <race>\nExample: *?create archer orc*");
+                    embedBuilder.title("Illegal race name! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
                 }
             }
         }
         catch (Exception e){}
+        sendMessage(getMessageChannel(), embedBuilder.build());
     }
 }
 
@@ -285,8 +308,6 @@ class CallEquip extends AnsweringHelper{
                         System.out.println("itemToEquip is == null");
                     //if (itemToEquip != null)
                     if (itemToEquip != null && itemToEquip.getWearablePart() != Wearable.NOTHING){
-                        StringBuilder stringBuilder = new StringBuilder();
-
                         System.out.println("itemToEquip name: " + itemToEquip.getName());
                         Wearable wearable = itemToEquip.getWearablePart();
                         System.out.println("wearable to equip: " + wearable);
@@ -414,7 +435,6 @@ class CallSell extends AnsweringHelper{
     }
 }
 
-
 class CallPing extends AnsweringHelper{
     public void processMessage(){
         if (getContent().equals("?ping")){
@@ -422,8 +442,6 @@ class CallPing extends AnsweringHelper{
         }
     }
 }
-
-
 
 class CallLootChest extends AnsweringHelper{
     public void processMessage(){
@@ -580,7 +598,119 @@ class CallEquipmentInfo extends AnsweringHelper{
         }
     }
 }
+/*
+class CallRat extends AnsweringHelper{
+    public void processMessage(){
+        if (getContent().equals("?rat")){
+            if (characterCheck()) {
+                Fight fight = new Fight(getCharacter(), MonsterManager.RAT);
+                if (fight.getResult().equals("A wins"))
+                    sendMessage(getMessageChannel(), getUserName() + " wins against a rat");
+                else if (fight.getResult().equals("B wins"))
+                    sendMessage(getMessageChannel(), getUserName() + " loses against a rat");
+                else if (fight.getResult().equals("tie"))
+                    sendMessage(getMessageChannel(), getUserName() + " ties with a rat");
+            }
+        }
+    }
+}
+*/
+class CallRat extends AnsweringHelper{
+    private String printFightResult(Fight fight, Monster monster){
+        if (fight.getResult().equals("A wins"))
+           return (getUserName() + " wins against " + monster.getName());
+        else if (fight.getResult().equals("B wins"))
+            return (getUserName() + " loses against the "  + monster.getName());
+        else
+            return (getUserName() + " ties with "  + monster.getName());
+    }
 
+    private String printLoot(ArrayList<Item> lootList){
+        StringBuilder stringBuilder = new StringBuilder(".");
+        Iterator<Item> itemIterator = lootList.iterator();
+        if (itemIterator.hasNext())
+            stringBuilder.append(itemIterator.next().getName());
+            if (itemIterator.hasNext())
+                stringBuilder.append(", ");
+        return stringBuilder.toString();
+    }
+
+    private EmbedCreateSpec.Builder addPrintingLoot(EmbedCreateSpec.Builder builder, ArrayList<Item> randomLoot){
+        builder.addField("Loot", printLoot(randomLoot), false);
+        return builder;
+    }
+
+    public void processMessage(){
+        if (getContent().equals("?forest")){
+            if (characterCheck()) {
+                Monster newMonster = DungeonManager.FOREST.getMonster();
+                if (newMonster != null) {
+                    Fight fight = new Fight(getCharacter(), newMonster);
+                    ArrayList<Item> randomLoot = newMonster.getRandomLoot();
+                    EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
+                            .color(Color.BLUE)
+                            .author(getUserName(), null, getUserAvatarUrl())
+                            .title("Fight")
+                            .addField(newMonster.getName(), newMonster.getDescription(), false)
+                            .addField(getUserName(), ":crossed_swords: " + getCharacter().getCombatPower(), true)
+                            .addField(newMonster.getName(), ":crossed_swords: " + newMonster.getCombatPower(), true)
+                            .addField("Result", printFightResult(fight, newMonster), false)
+                            //.addField("Loot", printLoot(randomLoot), false)
+                            //.addField(addSpaces("Total weight", EQ_MAX_CHAR), String.valueOf(getCharacter().getEquipment().getTotalWeight()), true)
+                            //.thumbnail("https://openclipart.org/image/800px/330656")
+                            .timestamp(Instant.now());
+                    if (fight.getResult().equals("A wins")) {
+                        embedBuilder.addField("Loot", printLoot(randomLoot), false);
+                    }
+                    try {
+                        getCharacter().getInventory().addItems(randomLoot);
+                    } catch (InventoryFullException e){
+                        sendMessage(getMessageChannel(), "not all looted");
+                    }
+                    sendMessage(getMessageChannel(), embedBuilder.build());
+                }
+
+/*
+                //Monster newMonster = DungeonManager.FOREST.getMonster();
+                if (newMonster != null) {
+                    Fight fight = new Fight(getCharacter(), newMonster);
+                    sendMessage(getMessageChannel(), newMonster.getDescription() + "\n");
+                    sendMessage(getMessageChannel(), getUserName() + " combat power: " + getCharacter().getCombatPower() + "\n" + newMonster.getName() + " combat power: " + newMonster.getCombatPower());
+                    if (fight.getResult().equals("A wins"))
+                        sendMessage(getMessageChannel(), getUserName() + " wins against " + newMonster.getName());
+                    else if (fight.getResult().equals("B wins"))
+                        sendMessage(getMessageChannel(), getUserName() + " loses against "  + newMonster.getName());
+                    else if (fight.getResult().equals("tie"))
+                        sendMessage(getMessageChannel(), getUserName() + " ties with "  + newMonster.getName());
+                }
+
+ */
+            }
+        }
+    }
+}
+
+class CallShip extends AnsweringHelper{
+    public void processMessage(){
+        if (getContent().equals("?lake")){
+            if (characterCheck()) {
+                Monster newMonster = DungeonManager.LAKE.getMonster();
+                if (newMonster != null) {
+                    Fight fight = new Fight(getCharacter(), newMonster);
+                    sendMessage(getMessageChannel(), getUserName() + " combat power: " + getCharacter().getCombatPower() + "\n" + newMonster.getName() + " combat power: " + newMonster.getCombatPower());
+                    if (fight.getResult().equals("A wins"))
+                        sendMessage(getMessageChannel(), getUserName() + " wins against " + newMonster.getName());
+                    else if (fight.getResult().equals("B wins"))
+                        sendMessage(getMessageChannel(), getUserName() + " loses against "  + newMonster.getName());
+                    else if (fight.getResult().equals("tie"))
+                        sendMessage(getMessageChannel(), getUserName() + " ties with "  + newMonster.getName());
+                }
+                else
+                    sendMessage(getMessageChannel(), "no monster is found");
+            }
+        }
+    }
+}
 
 class AnswerManager {
     private ArrayList<MessageProcessingMachine> messageProcessingArrayList = new ArrayList<>();
@@ -589,10 +719,7 @@ class AnswerManager {
         messageProcessingArrayList.add(new CallHelp());
         messageProcessingArrayList.add(new CallCreation());
         messageProcessingArrayList.add(new CallPing());
-        messageProcessingArrayList.add(new CallExperience());
         messageProcessingArrayList.add(new CallCreateCharacter());
-        messageProcessingArrayList.add(new CallBodyParts());
-        //messageProcessingArrayList.add(new CallInventory());
         messageProcessingArrayList.add(new CallLootChest());
         messageProcessingArrayList.add(new CallCharTester());
         messageProcessingArrayList.add(new CallCooldowns());
@@ -605,6 +732,10 @@ class AnswerManager {
         messageProcessingArrayList.add(new CallDrop());
         messageProcessingArrayList.add(new CallSell());
         messageProcessingArrayList.add(new CallGive());
+
+        messageProcessingArrayList.add(new CallRat());
+        messageProcessingArrayList.add(new CallShip());
+
     }
 
     private boolean selfSending(Message message) {

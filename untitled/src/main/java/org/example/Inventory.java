@@ -8,8 +8,15 @@ import java.util.Iterator;
 public class Inventory {
     public static int MAX_ITEM_NUMBER = 10;
 
+    public Inventory(){
+        itemList = new ArrayList<>();
+        this.money = 0;
+    }
+
     private ArrayList<Item> itemList;
-    //private int maxWeight;
+    public ArrayList<Item> getItemList(){
+        return itemList;
+    }
 
     private int money;
     public int getMoney(){return money;}
@@ -17,10 +24,9 @@ public class Inventory {
         this.money = money;
     }
 
-    public Inventory(){
-        itemList = new ArrayList<>();
-        this.money = 0;
-    }
+    //private int maxWeight;
+
+
     public int getSize(){
         return itemList.size();
     }
@@ -55,9 +61,7 @@ public class Inventory {
         itemList.remove(item);
     }
 
-    public ArrayList<Item> getItemList(){
-        return itemList;
-    }
+
     public int getItemsWeight(){
         int weight = 0;
         for (Item item : itemList){
@@ -99,79 +103,10 @@ public class Inventory {
             }
         }
     }
-
 }
-
 
 class InventoryFullException extends Exception{
     public InventoryFullException(String message){
         super(message);
     };
 }
-
-
-
-/*
-
-LEGACY CONTENT
-    ////
-    public String getItemNamesForEmbed(){
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Item item : itemList){
-            stringBuilder.append(item.getName() + "\n");
-        }
-        //stringBuilder.append("\u200B\n");
-        //stringBuilder.append("**TOTAL: **");
-        if (!stringBuilder.isEmpty())
-            return stringBuilder.toString();
-        else
-            return "\u200B";
-    }
-    public String getItemValuesForEmbed(){
-        StringBuilder stringBuilder = new StringBuilder();
-        int size = itemList.size();
-        int indexNumber = 1;
-        for (Item item : itemList){
-            if (indexNumber < size)
-                stringBuilder.append(item.getValue() + "\n");
-            else
-                stringBuilder.append("__" + item.getValue() + "__\n");
-            indexNumber++;
-        }
-        stringBuilder.append("**" + getItemsValue() + "**");
-        return stringBuilder.toString();
-    }
-    public String getItemWeightsForEmbed(){
-        StringBuilder stringBuilder = new StringBuilder();
-        int size = itemList.size();
-        int indexNumber = 1;
-        for (Item item : itemList){
-            if (indexNumber < size)
-                stringBuilder.append(item.getWeight() + "\n");
-            else
-                stringBuilder.append("__" + item.getWeight() + "__\n");
-            indexNumber++;
-        }
-        stringBuilder.append("**" + getItemsWeight() + "**");
-        return stringBuilder.toString();
-    }
-
-        public ArrayList<Item> getItemList(){ return itemList; }
-    public ArrayList<String> getItemNames(){
-        ArrayList<String> itemNames = new ArrayList<>();
-        for (Item item : itemList){
-            itemNames.add(item.getName());
-        }
-        return itemNames;
-    }
-
-
-    /*
-    public ArrayList<String> getItemNamesWeightValues(){
-        ArrayList<String> itemNames = new ArrayList<>();
-        for (Item item : itemList){
-            itemNames.add(item.getName() + " (w: " + item.getWeight() + ", v: " + item.getValue() + ")");
-        }
-        return itemNames;
-    }
- */

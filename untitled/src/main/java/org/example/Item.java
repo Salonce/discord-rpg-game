@@ -1,6 +1,4 @@
 package org.example;
-
-
 import java.util.NoSuchElementException;
 
 class ItemManager{
@@ -30,9 +28,29 @@ class ItemManager{
     //CRAFTING ITEMS
     public final static Item DOLPHIN_FIN = new CraftingItem("Dolphin's fin", 2, 100);
     public final static Item SHEEP_WOOL = new CraftingItem("Sheep wool", 2, 100);
+
+    public final static Item RAT_TAIL = new CraftingItem("Rat's tail", 1, 5);
+    public final static Item RAT_MEAT = new CraftingItem("Rat's meat", 3, 3);
+
+    public final static Item BEAR_MEAT = new CraftingItem("Bear's meat", 5, 15);
+    public final static Item BEAR_SKIN = new CraftingItem("Bear's skin", 10, 50);
+    public final static Item BUTTERFLY_WING = new CraftingItem("Butterfly's wing", 0, 10);
+
+    public final static Item GABRIELAS_TONGUE = new CraftingItem("Gabriela's tongue", 1, 50);
+    public final static Item FINGERHOODS_STORY = new CraftingItem("Fingerhood's story", 100, 0);
+
 }
 
-
+enum Wearable{
+    HEAD,
+    TORSO,
+    LEGS,
+    FEET,
+    HANDS,
+    FIRSTHAND,
+    SECONDHAND,
+    NOTHING
+}
 
 abstract class Item{
     //public static int MAX_ITEM_NAME_LENGTH = 15;
@@ -47,22 +65,14 @@ abstract class Item{
     protected String name;
     protected int weight;
     protected int value;
+    protected int defence;
+    protected int attack;
     //private int price;
 
     protected String getName(){return name;}
     protected int getWeight(){return weight;}
     protected int getValue(){return value;}
     protected int getPrice(){ return getValue()*PRICE_MULTIPLICATOR; }
-
-    public abstract boolean isMoney();
-    public abstract boolean hasAttack();
-    public abstract boolean hasDefense();
-
-    public abstract boolean isEmptyEquipment();
-    public abstract Wearable getWearablePart();
-
-    protected int defence;
-    protected int attack;
 
     public int getDefence(){
         if (hasDefense())
@@ -74,7 +84,16 @@ abstract class Item{
             return attack;
         else return 0;
     }
+
+    public abstract boolean isMoney();
+    public abstract boolean hasAttack();
+    public abstract boolean hasDefense();
+    public abstract boolean isEmptyEquipment();
+    public abstract Wearable getWearablePart();
+
 }
+
+
 
 
 abstract class DefensiveItem extends Item{
@@ -90,7 +109,6 @@ abstract class DefensiveItem extends Item{
     public boolean hasAttack() {
         return false;
     }
-
     @Override
     public boolean hasDefense() {
         return true;
@@ -430,16 +448,7 @@ final class Money extends Item{
     }
 }
 
-enum Wearable{
-    HEAD,
-    TORSO,
-    LEGS,
-    FEET,
-    HANDS,
-    FIRSTHAND,
-    SECONDHAND,
-    NOTHING
-}
+
 
 class NoSuchItemException extends Exception{
     public NoSuchItemException(){
@@ -447,63 +456,13 @@ class NoSuchItemException extends Exception{
     }
 }
 
-/*
-public class DefensiveItemBuilder<T extends DefensiveItem>{
-    public DefensiveItemBuilder(){}
-    private String name;
-    private int weight;
-    private int value;
-    private int price;
 
-    public DefensiveItemBuilder setName(String name){
-        this.name = name;
-        return this;
-    }
-    public DefensiveItemBuilder setWeight(int weight){
-        this.weight = weight;
-        return this;
-    }
-    public DefensiveItemBuilder setValue(int value){
-        this.value = value;
-        return this;
-    }
-    public DefensiveItemBuilder setPrice(int price){
-        this.price = price;
-        return this;
-    }
-    public T build(){
-        return new T(this);
-    }
+//
+enum WeaponType{
+    CUTTING,
+    BASHING,
+    PIERCING
+    //FIRE
+    //WATER
+    //POISON
 }
-*/
-
-/*
-
-    ////BUILDER
-    private Helmet(HelmetBuilder helmetBuilder){
-        super(helmetBuilder.name, helmetBuilder.weight, helmetBuilder.value);
-    }
-
-    public static class HelmetBuilder{
-        public HelmetBuilder(){}
-        private String name;
-        private int weight;
-        private int value;
-
-        public HelmetBuilder setName(String name){
-            this.name = name;
-            return this;
-        }
-        public HelmetBuilder setWeight(int weight){
-            this.weight = weight;
-            return this;
-        }
-        public HelmetBuilder setValue(int value){
-            this.value = value;
-            return this;
-        }
-        public Helmet buildHelmet(){
-            return new Helmet(this);
-        }
-    }
- */

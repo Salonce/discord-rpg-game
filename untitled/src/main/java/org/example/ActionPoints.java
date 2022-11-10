@@ -16,7 +16,12 @@ class ActionPoints{
     private ArrayList<Instant> timeList = new ArrayList<>();
     //private int action_points;
 
-    private Instant getLastInstant(){
+    public int getCurrentAP(){
+        cleanNegativeCooldowns();
+        return (MAX_AP - timeList.size());
+    }
+
+    private Instant getLastTimeListInstant(){
         Instant lastInstant;
         if (!timeList.isEmpty())
             lastInstant = timeList.get(timeList.size() - 1);
@@ -26,18 +31,23 @@ class ActionPoints{
         return lastInstant;
     }
 
+    private void cleanNegativeCooldowns(){
+        Iterator<Instant> cooldownIterator = timeList.iterator();
+        while(cooldownIterator.hasNext()){
+            if (Instant.now().compareTo(cooldownIterator.next()) >= 0){
+                cooldownIterator.remove();
+            }
+        }
+    }
+
     public void addCooldown(int number) throws NotEnoughActionPointsException{
         if ((getCurrentAP() - number) >= 0) {
             for (int i = 0; i < number; i++)
-                timeList.add(getLastInstant().plusSeconds(AP_RECOVERY_TIME));
+                timeList.add(getLastTimeListInstant().plusSeconds(AP_RECOVERY_TIME));
         }
         else{
             throw new NotEnoughActionPointsException(String.valueOf(number));
         }
-    }
-    public int getCurrentAP(){
-        cleanNegativeCooldowns();
-        return (MAX_AP - timeList.size());
     }
 
     public long getFirstCD(){
@@ -54,39 +64,18 @@ class ActionPoints{
     }
     public long getLastCD(){
         cleanNegativeCooldowns();
-        Duration duration = Duration.between(Instant.now(), getLastInstant());
+        Duration duration = Duration.between(Instant.now(), getLastTimeListInstant());
         if (duration.isPositive()){
             return duration.getSeconds();
         }
         return 0;
     }
 
-    private void cleanNegativeCooldowns(){
-        Iterator<Instant> cooldownIterator = timeList.iterator();
-        while(cooldownIterator.hasNext()){
-            if (Instant.now().compareTo(cooldownIterator.next()) >= 0){
-                cooldownIterator.remove();
-            }
-            else;
-        }
-    }
 
 
-    /////TESTING / LEGACY METHODS
-    public String getStringCooldowns(){
-        cleanNegativeCooldowns();
-        StringBuilder cooldownsBuilder = new StringBuilder("[");
-        Iterator<Instant> cooldownIterator = timeList.iterator();
-        while(cooldownIterator.hasNext()){
-            Duration duration = Duration.between(Instant.now(), cooldownIterator.next());
-            cooldownsBuilder.append(duration.getSeconds()+1);
-            if (cooldownIterator.hasNext()){
-                cooldownsBuilder.append(", ");
-            }
-        }
-        cooldownsBuilder.append("]");
-        return cooldownsBuilder.toString();
-    }
+
+    ///// For testing
+    /*
     public void printCooldowns(){
         cleanNegativeCooldowns();
         Iterator<Instant> cooldownIterator = timeList.iterator();
@@ -98,6 +87,7 @@ class ActionPoints{
             else;
         }
     }
+    */
 }
 
 class NotEnoughActionPointsException extends Exception{
