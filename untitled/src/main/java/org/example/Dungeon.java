@@ -1,61 +1,86 @@
 package org.example;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Random;
 
-abstract class Chancer{
-    private static Random random = new Random();
-    public static void chanceItem(Collection<Item> newItems, Item item, int probability){
-        if (random.nextInt(100) < probability){
-            newItems.add(item);
-        }
+
+class Dungeon{
+    private record MaybeMonster(Monster monster, int probability) {}
+
+    public Dungeon(DungeonBuilder dungeonBuilder){
+        this.maybeMonsterList = dungeonBuilder.maybeMonsterList;
     }
-    public static Item drawItem(Item item, int probability){
-        if (random.nextInt(100) < probability)
-            return item;
-        else
-            return null;
+    private final ArrayList<MaybeMonster> maybeMonsterList;
+
+    Monster getMonster() throws NoSuchMonsterException {
+        int randomDraw = new Random().nextInt(100); // return 0-99
+        int additiveProb = 0;
+        for (MaybeMonster maybeMonster : maybeMonsterList) {
+            additiveProb += maybeMonster.probability();
+            if (randomDraw < additiveProb)
+                return maybeMonster.monster();
+        }
+        throw new NoSuchMonsterException();
+    }
+
+    /////////// BUILDER
+    public static class DungeonBuilder{
+        public DungeonBuilder(){
+            this.maybeMonsterList = new ArrayList<>();
+            this.probability = 0;
+        }
+        private final ArrayList<MaybeMonster> maybeMonsterList;
+
+        public DungeonBuilder addMonster(Monster monster, int probability){
+            this.maybeMonsterList.add(new Dungeon.MaybeMonster(monster, sumProbability(probability)));
+            return this;
+        }
+
+        private int probability;
+        private int sumProbability(int number){
+            this.probability += number;
+            if (probability > 100)
+                throw new IllegalArgumentException("Probability for dungeon reached over 100");
+            return number;
+        }
+
+        public Dungeon build(){
+            return new Dungeon(this);
+        }
     }
 }
 
-interface Lootable{
-    ArrayList<Item> loot();
+class DungeonManager{
+    public static final Dungeon CAVE = new Dungeon.DungeonBuilder().addMonster(MonsterManager.RAT, 50).build();
+
+    public static final Dungeon FOREST = new Dungeon.DungeonBuilder()
+            .addMonster(MonsterManager.RAT, 30)
+            .addMonster(MonsterManager.BUTTERFLY, 30)
+            .addMonster(MonsterManager.SQUIRREL, 10)
+            .addMonster(MonsterManager.WOLF, 10)
+            .addMonster(MonsterManager.BEAR, 14)
+            .addMonster(MonsterManager.DRAGON, 5)
+            .build();
+
+    public static final Dungeon SERVER = new Dungeon.DungeonBuilder()
+            .addMonster(MonsterManager.FINGERHOOD, 50)
+            .addMonster(MonsterManager.GABRIELA, 50)
+            .build();
+
+    public static final Dungeon CHESTPLACE = new Dungeon.DungeonBuilder().addMonster(MonsterManager.CHEST, 100).build();
+
+    public static final Dungeon SHIP = new Dungeon.DungeonBuilder().addMonster(MonsterManager.SQUIRREL, 100).build();
+
+    public static final Dungeon LAKE = new Dungeon.DungeonBuilder().addMonster(MonsterManager.DOLPHIN, 1).build();
+
+
 }
 
-class Chest implements Lootable{
-    public ArrayList<Item> loot(){
-        ArrayList<Item> newItems = new ArrayList<>();
 
-        Chancer.chanceItem(newItems, ItemManager.STEEL_SWORD, 60);
-        Chancer.chanceItem(newItems, ItemManager.STEEL_HELMET, 20);
-        Chancer.chanceItem(newItems, ItemManager.STEEL_ARMOR, 20);
-        Chancer.chanceItem(newItems, ItemManager.STEEL_SHIELD, 60);
-        Chancer.chanceItem(newItems, ItemManager.DOLPHIN_SHIELD, 60);
-        Chancer.chanceItem(newItems, ItemManager.DOLPHIN_FIN, 25);
-        Chancer.chanceItem(newItems, ItemManager.SHEEP_WOOL, 25);
-        return newItems;
-    }
-}
 
-class LootingHelper{
-    public static ArrayList<String> getItemNamesInArrayList(ArrayList<Item> itemList){
-        ArrayList<String> itemNames = new ArrayList<>();
-        for (Item item : itemList){
-            itemNames.add(item.getName());
-        }
-        return itemNames;
-    }
-    public static String getItemNamesInString(ArrayList<Item> itemList){
-        ArrayList<String> itemNames = new ArrayList<>();
-        for (Item item : itemList){
-            itemNames.add(item.getName());
-        }
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String name : itemNames) {
-            stringBuilder.append(name + ",\n");
-        }
-        String fullList = stringBuilder.toString();
-        return fullList;
-    }
-}
+
+//one class for different Dungeons (to read names by it)
+//Dungeon Manager list function to get the Dungeon based off the command
+//Dungeon getDungeon(String command){
+//
+//}

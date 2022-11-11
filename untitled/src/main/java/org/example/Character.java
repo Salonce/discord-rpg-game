@@ -81,48 +81,6 @@ class Stats{
 
 
 /*
-
-
-//I like the idea of having specific needs to unlock next part of the game as - to kill this monster - you need these stats, this item and this
-
-//hitpoints
-//hits for 10
-//hits for 25
-//hits for 50
-
-//max 10?
-//what if hits for 0
-//hit for 1 is a minimum?
-
-//2
-//4
-//6
-//8
-//11
-//15
-//each *2 *2 *2 or 100-totallost = 80 then 100/totallost = x  x * each value = totallost = 100   something until dies
-
-//picture of a ghost, description
-//but what about he fight?
-
-
-//fight
-//You get into a fight with a big yeti which you win.
-//
-//
-// It attack you suddenly, makes you feel pain, breaks your leg, destroys your brain.
-
-
-//hurt leg - movement speed down
-//
-
-
-
-
-
-package org.example;
-
-
 class Skills{
     public Skills(){
     }

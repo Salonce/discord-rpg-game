@@ -50,9 +50,3 @@ class CharClassFactory{
         }
     }
 }
-
-class IllegalCharacterClassException extends Exception{
-   public IllegalCharacterClassException(String message){
-       super(message);
-   }
-}

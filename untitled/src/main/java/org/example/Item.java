@@ -448,15 +448,6 @@ final class Money extends Item{
     }
 }
 
-
-
-class NoSuchItemException extends Exception{
-    public NoSuchItemException(){
-        super();
-    }
-}
-
-
 //
 enum WeaponType{
     CUTTING,

@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 
 public class Inventory {
-    public static int MAX_ITEM_NUMBER = 10;
+    public static int MAX_ITEM_NUMBER = 12;
 
     public Inventory(){
         itemList = new ArrayList<>();
@@ -77,7 +77,7 @@ public class Inventory {
         return value;
     }
 
-    public Item getItemByName(String name){
+    public Item getItemByName(String name) throws NoSuchItemException {
         int i = 0;
         while(i < itemList.size()){
             if (itemList.get(i).getName().equalsIgnoreCase(name)){
@@ -87,7 +87,7 @@ public class Inventory {
                 i++;
             }
         }
-        return null;
+        throw new NoSuchItemException();
     }
 
     public void removeItemByName(String name){
@@ -105,8 +105,3 @@ public class Inventory {
     }
 }
 
-class InventoryFullException extends Exception{
-    public InventoryFullException(String message){
-        super(message);
-    };
-}
