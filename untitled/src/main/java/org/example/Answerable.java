@@ -3,7 +3,6 @@ package org.example;
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Color;
@@ -11,34 +10,30 @@ import discord4j.rest.util.Color;
 import java.time.Instant;
 import java.util.*;
 
-interface MessageProcessingMachine{
-    void processMessage();
-}
-
-abstract class AnsweringHelper implements MessageProcessingMachine{
+abstract class MessageProcessor{
     public static void setMessage(Message message) throws InvalidUserException {
         try {
-            AnsweringHelper.id = message.getAuthor().get().getId();
-            AnsweringHelper.content = message.getContent();
-            AnsweringHelper.channel = message.getChannel().block();
-            AnsweringHelper.userName = message.getAuthor().get().getUsername();
-            AnsweringHelper.userNameId = "<@" + id.asString() + ">";
-            AnsweringHelper.userAvatarUrl = message.getAuthor().get().getAvatarUrl();
-            AnsweringHelper.character = characterManager.getCharacterById(id);
-
+            MessageProcessor.id = message.getAuthor().get().getId();
+            MessageProcessor.content = message.getContent();
+            MessageProcessor.channel = message.getChannel().block();
+            MessageProcessor.userName = message.getAuthor().get().getUsername();
+            MessageProcessor.userNameId = "<@" + id.asString() + ">";
+            MessageProcessor.userAvatarUrl = message.getAuthor().get().getAvatarUrl();
+            MessageProcessor.character = characterManager.getCharacterById(id);
         }
         catch(NoSuchElementException noSuchElementException){
             throw new InvalidUserException("Invalid message Author");
         } catch (NoSuchCharacterException noSuchCharacterException) {
-            AnsweringHelper.character = null;
+            MessageProcessor.character = null;
         }
     }
 
-    private static String content;
-    protected static String getContent(){return content;}
+    public abstract void process();
 
     private static MessageChannel channel;
-    protected static MessageChannel getMessageChannel(){return channel;}
+
+    private static String content;
+    protected static String getContent(){return content;}
 
     private static Snowflake id;
     protected static Snowflake getId(){return id;}
@@ -60,20 +55,20 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
 
     private static DiscordClient discordClient;
     public static void setDiscordClient(DiscordClient discordClient) {
-        AnsweringHelper.discordClient = discordClient;
+        MessageProcessor.discordClient = discordClient;
     }
 
     private static Shop shop;
     public static void setShops(Shop shop) {
-        AnsweringHelper.shop = shop;
+        MessageProcessor.shop = shop;
     }
-    public static Shop getShop(){return AnsweringHelper.shop;}
+    public static Shop getShop(){return MessageProcessor.shop;}
 
 
     public String getUsernameBySnowflake(Snowflake id){
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder(" ");
         try{
-            discordClient.getUserById(id).getData().subscribe(data -> {stringBuilder.append(data.username());});
+            discordClient.getUserById(id).getData().subscribe(data -> stringBuilder.append(data.username()));
             return stringBuilder.toString();
         } catch (Exception e){
             System.out.println("exception when catching user");
@@ -82,29 +77,35 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
     }
 
     public static void setCharacterManager(CharacterManager characterManager) {
-        AnsweringHelper.characterManager = characterManager;
+        MessageProcessor.characterManager = characterManager;
     }
 
     protected static boolean characterCheck(){
         if (character == null){
-            sendMessage(channel, "You need to create a character to use that command!");
+            sendMessage("You need to create a character to use that command!");
             return false;
         }
         else return true;
     }
     protected static boolean characterNegativeCheck(){
         if (character != null){
-            sendMessage(channel, "You can't use that command if you already have a character!");
+            sendMessage("You can't use that command if you already have a character!");
             return false;
         }
         else return true;
     }
-    protected static void sendMessage(MessageChannel messageChannel, String message){
-        messageChannel.createMessage(message).block();
+    protected static void sendMessage(EmbedCreateSpec embedMessage){
+        channel.createMessage(embedMessage).block();
     }
-    protected static void sendMessage(MessageChannel messageChannel, EmbedCreateSpec embedMessage){
-        messageChannel.createMessage(embedMessage).block();
+    protected static void sendMessage(String message){
+        EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                .author(getUserName(), null, getUserAvatarUrl())
+                .title(message)
+                .timestamp(Instant.now())
+                .build();
+        sendMessage(embed);
     }
+
     protected static String addSpaces(String string, int maxWidth){
         StringBuilder stringBuilder = new StringBuilder(string);
         while(stringBuilder.length() < maxWidth){
@@ -112,51 +113,44 @@ abstract class AnsweringHelper implements MessageProcessingMachine{
         }
         return stringBuilder.toString();
     }
-    /*
-    protected static String[] retrieveSplitContent(int limit){
-        return getContent().split(" ", limit);
-    }
-    */
 }
 
-
-class CallGive extends AnsweringHelper{
-    public void processMessage(){
+class CallGive extends MessageProcessor{
+    public void process(){
         try{
-            String[] splitString = getContent().split(" ", 3);
-            if (splitString[0].equals("?give")){
-                String itemName = splitString[2];
-                Snowflake secondId = Snowflake.of(splitString[1]);
-                Character receivingCharacter = getCharacterManager().getCharacterById(secondId);
-                Item itemToMove = getCharacter().getInventory().getItemByName(itemName);
-                receivingCharacter.getInventory().addItem(itemToMove);
-                getCharacter().getInventory().removeItem(itemToMove);
+            String[] content = getContent().split(" ", 3);
+            if (content[0].equals("?give")){
+                String itemName = content[2];
+                Snowflake secondId = Snowflake.of(content[1]);
+                Item item = getCharacter().getInventory().get(itemName);
+                getCharacterManager().getCharacterById(secondId).getInventory().addItem(item);
+                getCharacter().getInventory().removeItem(item);
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
                         //secondId can be null
-                        .author(getUserName() + " gives " + itemToMove.getName() + " to " + getUsernameBySnowflake(secondId), null, getUserAvatarUrl())
+                        .author(getUserName() + " gives " + itemName + " to " + getUsernameBySnowflake(secondId), null, getUserAvatarUrl())
                         .color(Color.RED)
                         .build();
-                sendMessage(getMessageChannel(), embed);
+                sendMessage(embed);
             }
         } catch (NoSuchCharacterException ex) {
-            sendMessage(getMessageChannel(), "Character doesn't exist!");
+            sendMessage("Make a character first!");
         } catch (NumberFormatException e){
-            sendMessage(getMessageChannel(), "Wrong ID");
+            sendMessage("Wrong ID");
         } catch (InventoryFullException e) {
-            sendMessage(getMessageChannel(), "Sorry! Can not do! Inventory of receiver is full.");
+            sendMessage( "Sorry! Can not do! Inventory of receiver is full.");
         } catch (NullPointerException e){
-            sendMessage(getMessageChannel(), "Sorry! Something went wrong with receiver's name");
+            sendMessage("Sorry! Something went wrong with receiver's name");
         } catch (NoSuchItemException e){
-            sendMessage(getMessageChannel(), "Sorry! You don't have that item!");
+            sendMessage("Sorry! You don't have that item!");
         } catch (Exception e){
-            sendMessage(getMessageChannel(), "Unknown exception");
+            sendMessage("Unknown exception");
         }
     }
 }
 
 
-class CallCharTester extends AnsweringHelper{
-    public void processMessage(){
+class CallCharTester extends MessageProcessor{
+    public void process(){
         try {
             if (getContent().equals("?tester") && characterNegativeCheck()){
                 CharClass charClass = CharClassFactory.createClass("archer");
@@ -173,15 +167,14 @@ class CallCharTester extends AnsweringHelper{
                     .addField("Class", charClass.getName(), true)
                     .addField("Race", charRace.getName(), true)
                     .build();
-                 sendMessage(getMessageChannel(), embed);
+                 sendMessage(embed);
             }
         } catch(Exception e){
-
         }
     }
 }
 
-class CallHelp extends AnsweringHelper{
+class CallHelp extends MessageProcessor{
     private String getHelp(){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("?help")
@@ -199,7 +192,7 @@ class CallHelp extends AnsweringHelper{
 
         return stringBuilder.toString();
     }
-    public void processMessage(){
+    public void process(){
         if (getContent().equals("?help")){
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
                         .color(Color.BLUE)
@@ -208,21 +201,13 @@ class CallHelp extends AnsweringHelper{
                         .author(getUserName(), null, getUserAvatarUrl())
                         .timestamp(Instant.now())
                         .build();
-                sendMessage(getMessageChannel(), embed);
+                sendMessage(embed);
         }
     }
 }
 
-class CallCreation extends AnsweringHelper{
-    public void processMessage(){
-        if (getContent().equals("?created")){
-            sendMessage(getMessageChannel(), "The bot was created in 2022!");
-        }
-    }
-}
-
-class CallCharInfo extends AnsweringHelper{
-    public void processMessage(){
+class CallCharInfo extends MessageProcessor{
+    public void process(){
         if (getContent().equals("?charinfo")){
             if (characterCheck()){
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
@@ -234,14 +219,13 @@ class CallCharInfo extends AnsweringHelper{
                         .author(getUserName(), null, getUserAvatarUrl())
                         .timestamp(Instant.now())
                         .build();
-                sendMessage(getMessageChannel(), embed);
+                sendMessage(embed);
             }
         }
     }
 }
 
-
-class CallCreateCharacter extends AnsweringHelper {
+class CallCreateCharacter extends MessageProcessor {
     private EmbedCreateSpec.Builder getErrorEmbedBuilder() {
         return EmbedCreateSpec.builder()
                 .color(Color.BLUE)
@@ -249,187 +233,148 @@ class CallCreateCharacter extends AnsweringHelper {
                 .timestamp(Instant.now());
     }
 
-    public void processMessage() {
+    public void process() {
         try {
-            String[] splitContent = getContent().split(" ", 3);
-            if (splitContent[0].equals("?create")) {
-                CharClass charClass = CharClassFactory.createClass(splitContent[1]);
-                CharRace charRace = CharRaceFactory.createRace(splitContent[2]);
+            String[] content = getContent().split(" ", 3);
+            if (content[0].equals("?create")) {
+                CharClass charClass = CharClassFactory.createClass(content[1]);
+                CharRace charRace = CharRaceFactory.createRace(content[2]);
                 if (characterNegativeCheck()) {
                     getCharacterManager().createNewCharacter(getId(), charClass, charRace);
                     EmbedCreateSpec.Builder embedBuilder = getErrorEmbedBuilder().title("Character created!")
                             .addField("Class", charClass.getName(), true)
                             .addField("Race", charRace.getName(), true);
-                    sendMessage(getMessageChannel(), embedBuilder.build());
+                    sendMessage(embedBuilder.build());
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            EmbedCreateSpec.Builder embedBuilder = getErrorEmbedBuilder().title("Not enough arguments! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
-            sendMessage(getMessageChannel(), embedBuilder.build());
+            sendMessage("Not enough arguments!");
         } catch (IllegalCharacterClassException e) {
-            EmbedCreateSpec.Builder embedBuilder = getErrorEmbedBuilder().title("Illegal class name! Try:\n?'create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
-            sendMessage(getMessageChannel(), embedBuilder.build());
+            sendMessage("Illegal class name!");
         } catch (IllegalCharacterRaceException e) {
-            EmbedCreateSpec.Builder embedBuilder = getErrorEmbedBuilder().title("Illegal race name! Try:\n'?create <class: *knight*, *archer*, *mage*> <race: *human*, *elf*, *orc*>'\nExample: '*?create archer orc*'");
-            sendMessage(getMessageChannel(), embedBuilder.build());
+            sendMessage("Illegal race name!!");
         } catch (Exception e) {
-            EmbedCreateSpec.Builder embedBuilder = getErrorEmbedBuilder().title("Unknown Exception");
-            sendMessage(getMessageChannel(), embedBuilder.build());
+            sendMessage("Unknown Exception!");
         }
     }
 }
 
-class CallEquip extends AnsweringHelper{
-    public void processMessage(){
+class CallEquip extends MessageProcessor{
+    public void process(){
         try{
-            String[] splitString = getContent().split(" ", 2);
-            if (splitString[0].equals("?equip")){
-                try{
-                    String itemName = splitString[1];
-                    System.out.println(splitString[0] + " : " + (splitString[1]));
-                    Item itemToEquip = getCharacter().getInventory().getItemByName(itemName);
-                    if (itemToEquip == null)
-                        System.out.println("itemToEquip is == null");
-                    //if (itemToEquip != null)
-                    if (itemToEquip != null && itemToEquip.getWearablePart() != Wearable.NOTHING){
-                        System.out.println("itemToEquip name: " + itemToEquip.getName());
-                        Wearable wearable = itemToEquip.getWearablePart();
-                        System.out.println("wearable to equip: " + wearable);
-                        Item itemToUnequip = getCharacter().getEquipment().getItemByWearable(wearable);
-                        System.out.println("item to unequip: " + itemToUnequip.getName());
-                        getCharacter().getEquipment().equipItem(itemToEquip);
-                        System.out.println("equipped: " + itemToEquip.getName());
-                        getCharacter().getInventory().removeItemByName(itemName);
-                        System.out.println("removed from Inventory: " + itemToEquip.getName());
-                        if (!itemToUnequip.isEmptyEquipment()) {
-                            getCharacter().getInventory().addItem(itemToUnequip);
-                            System.out.println("added to back to inventory: " + itemToUnequip.getName());
-                        }
-                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                                .author(getUserName() + " equipped " + itemToEquip.getName(), null, getUserAvatarUrl())
-                                .color(Color.RED)
-                                .build();
-                        sendMessage(getMessageChannel(), embed);
+            String[] content = getContent().split(" ", 2);
+            String itemName = content[1];
+            if (content[0].equals("?equip")){
+                Item itemOn = getCharacter().getInventory().get(itemName);
+                if (itemOn != null && itemOn.getWearable() != Wearable.NOTHING){
+                    Wearable wearable = itemOn.getWearable();
+                    Item itemOff = getCharacter().getEquipment().get(wearable);
+                    getCharacter().getEquipment().equipItem(itemOn);
+                    getCharacter().getInventory().remove(itemName);
+                    if (!itemOff.isEmptyEquipment()) {
+                        getCharacter().getInventory().addItem(itemOff);
                     }
-                } catch (Exception e){
-                    sendMessage(getMessageChannel(), "Incorrect command!");
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                            .author(getUserName() + " equipped " + itemOn.getName(), null, getUserAvatarUrl())
+                            .color(Color.RED)
+                            .build();
+                    sendMessage(embed);
                 }
             }
+        } catch (IndexOutOfBoundsException e){
+            /// do nothing
+        }
+        catch (Exception e){
+            sendMessage("Incorrect command!");
+        }
+    }
+}
+
+class CallDrop extends MessageProcessor{
+    public void process(){
+        try{
+            String[] content = getContent().split(" ", 2);
+            if (content[0].equals("?drop")){
+                String itemName = content[1];
+                Item itemToDrop = getCharacter().getInventory().get(itemName);
+                if (itemToDrop != null){
+                    getCharacter().getInventory().remove(itemName);
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                        .author(getUserName() + " dropped " + itemToDrop.getName(), null, getUserAvatarUrl())
+                        .color(Color.RED)
+                        .build();
+                    sendMessage(embed);
+                }
+            }
+        } catch (IndexOutOfBoundsException e){
+        } catch (Exception e){
+            sendMessage("Incorrect command!");
+        }
+    }
+}
+
+class CallUnequip extends MessageProcessor{
+    public void process(){
+        try{
+            String[] content = getContent().split(" ", 2);
+            if (content[0].equals("?unequip")) {
+                String itemName = content[1];
+                Item itemToUnequip = getCharacter().getEquipment().get(itemName);
+                if (!itemToUnequip.isEmptyEquipment()) {
+                    getCharacter().getEquipment().remove(itemName);
+                    getCharacter().getInventory().addItem(itemToUnequip);
+                }
+                EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                    .author(getUserName() + " unequipped " + itemToUnequip.getName(), null, getUserAvatarUrl())
+                    .color(Color.RED)
+                    .build();
+                sendMessage(embed);
+            }
+        }
+        catch (IndexOutOfBoundsException e){
+        } catch (NoSuchItemException e){
+            sendMessage("You don't have that item!");
+        }catch (Exception e){
+            //do nothing
+        }
+    }
+}
+
+class CallSell extends MessageProcessor{
+    public void process(){
+        try{
+            String[] content = getContent().split(" ", 2);
+            if (content[0].equalsIgnoreCase("?sell")){
+                String itemName = content[1];
+                Item itemToSell = getCharacter().getInventory().get(content[1]);
+                if (itemToSell != null){
+                    getCharacter().getInventory().remove(itemName);
+                    getCharacter().getInventory().setMoney(getCharacter().getInventory().getMoney() + itemToSell.getValue());
+                    EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                            .author(getUserName() + " sold " + itemToSell.getName() + " for " + itemToSell.getValue(), null, getUserAvatarUrl())
+                            .color(Color.RED)
+                            .build();
+                    sendMessage(embed);
+                }
+            }
+        } catch (IndexOutOfBoundsException e){
+            sendMessage("Incorrect command!");
         }
         catch (Exception e){}
     }
 }
 
-class CallDrop extends AnsweringHelper{
-    public void processMessage(){
-        try{
-            String[] splitString = getContent().split(" ", 2);
-            if (splitString[0].equals("?drop")){
-                try{
-                    String itemName = splitString[1];
-                    System.out.println(splitString[0] + " : " + (splitString[1]));
-                    Item itemToDrop = getCharacter().getInventory().getItemByName(itemName);
-                    if (itemToDrop == null)
-                        System.out.println("itemToDrop is == null");
-                    if (itemToDrop != null){
-                        StringBuilder stringBuilder = new StringBuilder();
-                        System.out.println("itemToDrop name: " + itemToDrop.getName());
-                        getCharacter().getInventory().removeItemByName(itemName);
-                        System.out.println("removed from Inventory: " + itemToDrop.getName());
-                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                                .author(getUserName() + " dropped " + itemToDrop.getName(), null, getUserAvatarUrl())
-                                .color(Color.RED)
-                                .build();
-                        sendMessage(getMessageChannel(), embed);
-                    }
-                } catch (Exception e){
-                    sendMessage(getMessageChannel(), "Incorrect command!");
-                }
-            }
-        }
-        catch (Exception e){}
-    }
-}
-
-class CallUnequip extends AnsweringHelper{
-    public void processMessage(){
-        try{
-            String[] splitString = getContent().split(" ", 2);
-            if (splitString[0].equals("?unequip")){
-                try{
-                    String itemName = splitString[1];
-                    System.out.println(splitString[0] + " : " + (splitString[1]));
-                    Item itemToUnequip = getCharacter().getEquipment().getItemByName(itemName);
-                    if (itemToUnequip == null)
-                        System.out.println("itemToEquip is == null");
-                    if (itemToUnequip != null){
-                        System.out.println("itemToUnequip name: " + itemName);
-                        if (itemToUnequip.isEmptyEquipment()) {
-                            System.out.println("no-equipment item, doing nothing...");
-                        }
-                        if (!itemToUnequip.isEmptyEquipment()) {
-                            getCharacter().getEquipment().removeItemByName(itemName);
-                            getCharacter().getInventory().addItem(itemToUnequip);
-                            System.out.println("added to back to inventory: " + itemToUnequip.getName());
-                            //what if inventory full?
-                        }
-                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                                .author(getUserName() + " unequipped " + itemToUnequip.getName(), null, getUserAvatarUrl())
-                                .color(Color.RED)
-                                .build();
-                        sendMessage(getMessageChannel(), embed);
-                    }
-                } catch (Exception e){
-                    sendMessage(getMessageChannel(), "Incorrect command!");
-                }
-            }
-        }
-        catch (Exception e){}
-    }
-}
-
-class CallSell extends AnsweringHelper{
-    public void processMessage(){
-        try{
-            String[] splitString = getContent().split(" ", 2);
-            if (splitString[0].equalsIgnoreCase("?sell")){
-                try{
-                    String itemName = splitString[1];
-                    System.out.println(splitString[0] + " : " + (splitString[1]));
-                    Item itemToSell = getCharacter().getInventory().getItemByName(splitString[1]);
-                    if (itemToSell == null)
-                        System.out.println("itemToSell is == null");
-                    if (itemToSell != null){
-                        System.out.println("itemToSell name: " + itemToSell.getName());
-                        getCharacter().getInventory().removeItemByName(itemName);
-                        getCharacter().getInventory().setMoney(getCharacter().getInventory().getMoney() + itemToSell.getValue());
-                        System.out.println("removed from Inventory: " + itemToSell.getName());
-                        EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                                .author(getUserName() + " sold " + itemToSell.getName() + " for " + itemToSell.getValue(), null, getUserAvatarUrl())
-                                .color(Color.RED)
-                                .build();
-                        sendMessage(getMessageChannel(), embed);
-                    }
-                } catch (Exception e){
-                    sendMessage(getMessageChannel(), "Incorrect command!");
-                }
-            }
-        }
-        catch (Exception e){}
-    }
-}
-
-class CallPing extends AnsweringHelper{
-    public void processMessage(){
+class CallPing extends MessageProcessor{
+    public void process(){
         if (getContent().equals("?ping")){
-            sendMessage(getMessageChannel(), "pong");
+            sendMessage("pong");
         }
     }
 }
 
-class CallCooldowns extends AnsweringHelper{
+class CallCooldowns extends MessageProcessor{
     final static int AP_MAX_CHAR = 20;
-    public void processMessage(){
+    public void process(){
         if (getContent().equals("?ap")){
             if (characterCheck()) {
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
@@ -443,23 +388,23 @@ class CallCooldowns extends AnsweringHelper{
                         //.thumbnail("https://openclipart.org/image/800px/330656")
                         .timestamp(Instant.now())
                         .build();
-                sendMessage(getMessageChannel(), embed);
+                sendMessage(embed);
             }
         }
     }
 }
 
-class CallShop extends AnsweringHelper{
-    public void processMessage(){
+class CallShop extends MessageProcessor{
+    public void process(){
         if (getContent().equals("?shop")){
             if (characterCheck()) {
-                sendMessage(getMessageChannel(), getShop().itemsAvailable());
+                sendMessage(getShop().itemsAvailable());
             }
         }
     }
 }
 
-class CallI extends AnsweringHelper{
+class CallI extends MessageProcessor{
     final static int INV_MAX_CHAR = 15;
     private String getItemInfo(Item item){
         int empty = 0;
@@ -483,7 +428,7 @@ class CallI extends AnsweringHelper{
         return stringBuilder.toString();
     }
 
-    public void processMessage(){
+    public void process(){
         if (getContent().equals("?i")){
             if (characterCheck()) {
                 EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
@@ -496,13 +441,13 @@ class CallI extends AnsweringHelper{
                 for (Item item : getCharacter().getInventory().getItemList()){
                     embedBuilder.addField(addSpaces(item.getName(), INV_MAX_CHAR), getItemInfo(item), true);
                 }
-                sendMessage(getMessageChannel(), embedBuilder.build());
+                sendMessage(embedBuilder.build());
             }
         }
     }
 }
 
-class CallEquipmentInfo extends AnsweringHelper{
+class CallEquipmentInfo extends MessageProcessor{
     final static int EQ_MAX_CHAR = 13;
     private String getEmbedStats(Item item){
         StringBuilder stringBuilder = new StringBuilder();
@@ -517,12 +462,11 @@ class CallEquipmentInfo extends AnsweringHelper{
         }
         return stringBuilder.toString();
     }
-    public void processMessage(){
+    public void process(){
         if (getContent().equals("?eq")){
             if (characterCheck()){
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
                         .color(Color.BLUE)
-                        //.title("Equipment")
                         .addField(addSpaces("Head", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getHeadEquipment()), true)
                         .addField(addSpaces("Torso", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getTorsoEquipment()), true)
                         .addField(addSpaces("Legs", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getLegsEquipment()), true)
@@ -531,19 +475,16 @@ class CallEquipmentInfo extends AnsweringHelper{
                         .addField(addSpaces("1st hand", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getFirstHandEquipment()), true)
                         .addField(addSpaces("2nd hand", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getSecondHandEquipment()), true)
                         .addField("Total", ":shield: " + getCharacter().getEquipment().getTotalDefence() + "\n:axe: " + getCharacter().getEquipment().getTotalAttack() + "\n:scales: " + getCharacter().getEquipment().getTotalWeight(), true)
-                        //.addField(addSpaces("Total attack", EQ_MAX_CHAR), String.valueOf(getCharacter().getEquipment().getTotalAttack()), true)
-                        //.addField(addSpaces("Total weight", EQ_MAX_CHAR), String.valueOf(getCharacter().getEquipment().getTotalWeight()), true)
                         .author(getUserName() + " - Equipment", null, getUserAvatarUrl())
-                        //.thumbnail("https://openclipart.org/image/800px/330656")
                         .timestamp(Instant.now())
                         .build();
-                sendMessage(getMessageChannel(), embed);
+                sendMessage(embed);
             }
         }
     }
 }
 
-class CallRat extends AnsweringHelper{
+class CallRat extends MessageProcessor{
     private String printFightResult(Fight fight, Monster monster){
         if (fight.getResult().equals("A wins"))
            return (getUserName() + " wins against " + monster.getName());
@@ -566,13 +507,6 @@ class CallRat extends AnsweringHelper{
         return stringBuilder.toString();
     }
 
-    /*
-    private EmbedCreateSpec.Builder addPrintingLoot(EmbedCreateSpec.Builder builder, ArrayList<Item> randomLoot){
-        builder.addField("Loot", printLoot(randomLoot), false);
-        return builder;
-    }
-     */
-
     private Dungeon getDungeon(String command){
         switch (command){
             case "?forest":
@@ -590,7 +524,7 @@ class CallRat extends AnsweringHelper{
         }
     }
 
-    public void processMessage(){
+    public void process(){
         Dungeon dungeon = getDungeon(getContent());
         if (dungeon != null){
             try {
@@ -611,39 +545,36 @@ class CallRat extends AnsweringHelper{
                         embedBuilder.addField("Loot", printLoot(randomLoot), false);
                     }
                     getCharacter().getInventory().addItems(randomLoot);
-                    sendMessage(getMessageChannel(), embedBuilder.build());
+                    sendMessage(embedBuilder.build());
                     }
             } catch (InventoryFullException e){
-                sendMessage(getMessageChannel(), "not all looted");
+                sendMessage("not all looted");
             } catch (NoSuchMonsterException e) {
-                sendMessage(getMessageChannel(), "no luck finding a monster");
+                sendMessage("no luck finding a monster");
             }
         }
     }
 }
 
 class AnswerManager {
-    private ArrayList<MessageProcessingMachine> messageProcessingArrayList = new ArrayList<>();
+    private ArrayList<MessageProcessor> messageProcessorList = new ArrayList<>();
 
     public AnswerManager() {
-        messageProcessingArrayList.add(new CallHelp());
-        messageProcessingArrayList.add(new CallCreation());
-        messageProcessingArrayList.add(new CallPing());
-        messageProcessingArrayList.add(new CallCreateCharacter());
-        messageProcessingArrayList.add(new CallCharTester());
-        messageProcessingArrayList.add(new CallCooldowns());
-        messageProcessingArrayList.add(new CallShop());
-        messageProcessingArrayList.add(new CallI());
-        messageProcessingArrayList.add(new CallCharInfo());
-        messageProcessingArrayList.add(new CallEquipmentInfo());
-        messageProcessingArrayList.add(new CallEquip());
-        messageProcessingArrayList.add(new CallUnequip());
-        messageProcessingArrayList.add(new CallDrop());
-        messageProcessingArrayList.add(new CallSell());
-        messageProcessingArrayList.add(new CallGive());
-
-        messageProcessingArrayList.add(new CallRat());
-
+        messageProcessorList.add(new CallHelp());
+        messageProcessorList.add(new CallPing());
+        messageProcessorList.add(new CallCreateCharacter());
+        messageProcessorList.add(new CallCharTester());
+        messageProcessorList.add(new CallCooldowns());
+        messageProcessorList.add(new CallShop());
+        messageProcessorList.add(new CallI());
+        messageProcessorList.add(new CallCharInfo());
+        messageProcessorList.add(new CallEquipmentInfo());
+        messageProcessorList.add(new CallEquip());
+        messageProcessorList.add(new CallUnequip());
+        messageProcessorList.add(new CallDrop());
+        messageProcessorList.add(new CallSell());
+        messageProcessorList.add(new CallGive());
+        messageProcessorList.add(new CallRat());
     }
 
     private boolean selfSending(Message message) {
@@ -659,11 +590,11 @@ class AnswerManager {
     public void process(Message message) {
         try{
             if (!selfSending(message)) {
-                AnsweringHelper.setMessage(message);
-                Iterator<MessageProcessingMachine> messageProcessingMachine = messageProcessingArrayList.iterator();
+                MessageProcessor.setMessage(message);
+                Iterator<MessageProcessor> messageProcessingMachine = messageProcessorList.iterator();
                 while (messageProcessingMachine.hasNext()) {
                     //System.out.println("executing...");
-                    messageProcessingMachine.next().processMessage();
+                    messageProcessingMachine.next().process();
                 }
             }
         }

@@ -62,55 +62,69 @@ class Equipment{
     }
 
     public void equipItem(Item item){
-        if (item.getWearablePart() == Wearable.HEAD){
+        if (item.getWearable() == Wearable.HEAD){
             headEquipment = item;
         }
-        else if (item.getWearablePart() == Wearable.TORSO){
+        else if (item.getWearable() == Wearable.TORSO){
             torsoEquipment = item;
         }
-        else if (item.getWearablePart() == Wearable.LEGS){
+        else if (item.getWearable() == Wearable.LEGS){
             legsEquipment = item;
         }
-        else if (item.getWearablePart() == Wearable.FEET){
+        else if (item.getWearable() == Wearable.FEET){
             feetEquipment = item;
         }
-        else if (item.getWearablePart() == Wearable.HANDS){
+        else if (item.getWearable() == Wearable.HANDS){
             handsEquipment = item;
         }
-        else if (item.getWearablePart() == Wearable.FIRSTHAND){
+        else if (item.getWearable() == Wearable.FIRSTHAND){
             firstHandEquipment = item;
         }
-        else if (item.getWearablePart() == Wearable.SECONDHAND){
+        else if (item.getWearable() == Wearable.SECONDHAND){
             secondHandEquipment = item;
         }
     }
 
-    public Item getItemByName(String name){
+    public Item get(String name) throws NoSuchItemException {
         if (headEquipment.getName().equalsIgnoreCase(name)){
+            if (headEquipment == null)
+                throw new NoSuchItemException();
             return headEquipment;
         }
         else if (torsoEquipment.getName().equalsIgnoreCase(name)){
+            if (torsoEquipment == null)
+                throw new NoSuchItemException();
             return torsoEquipment;
         }
         else if (legsEquipment.getName().equalsIgnoreCase(name)){
+            if (legsEquipment == null)
+                throw new NoSuchItemException();
             return legsEquipment;
         }
         else if (handsEquipment.getName().equalsIgnoreCase(name)){
+            if (handsEquipment == null)
+                throw new NoSuchItemException();
             return handsEquipment;
         }
         else if (feetEquipment.getName().equalsIgnoreCase(name)){
+            if (feetEquipment == null)
+                throw new NoSuchItemException();
             return feetEquipment;
         }
         else if (firstHandEquipment.getName().equalsIgnoreCase(name)){
+            if (firstHandEquipment == null)
+                throw new NoSuchItemException();
             return firstHandEquipment;
         }
         else if (secondHandEquipment.getName().equalsIgnoreCase(name)){
+            if (secondHandEquipment == null)
+                throw new NoSuchItemException();
             return secondHandEquipment;
         }
         else return null;
     }
 
-    public Item getItemByWearable(Wearable wearable){
+    public Item get(Wearable wearable){
         if (wearable == Wearable.HEAD){
             return headEquipment;
         }
@@ -135,7 +149,7 @@ class Equipment{
         else return null;
     }
 
-    public boolean removeItemByName(String name){
+    public boolean remove(String name){
         if (headEquipment.getName().equalsIgnoreCase(name)){
             this.headEquipment = ItemManager.NO_HELMET;
             return true;

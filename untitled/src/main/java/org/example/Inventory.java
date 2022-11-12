@@ -77,7 +77,7 @@ public class Inventory {
         return value;
     }
 
-    public Item getItemByName(String name) throws NoSuchItemException {
+    public Item get(String name) throws NoSuchItemException {
         int i = 0;
         while(i < itemList.size()){
             if (itemList.get(i).getName().equalsIgnoreCase(name)){
@@ -90,7 +90,7 @@ public class Inventory {
         throw new NoSuchItemException();
     }
 
-    public void removeItemByName(String name){
+    public void remove(String name){
         int i = 0;
         while(i < itemList.size()){
             if (itemList.get(i).getName().equalsIgnoreCase(name)){

@@ -1,5 +1,4 @@
 package org.example;
-import java.util.NoSuchElementException;
 
 enum Wearable{
     HEAD,
@@ -49,7 +48,7 @@ abstract class Item{
     public abstract boolean hasAttack();
     public abstract boolean hasDefense();
     public abstract boolean isEmptyEquipment();
-    public abstract Wearable getWearablePart();
+    public abstract Wearable getWearable();
 
 }
 
@@ -149,7 +148,7 @@ class NoHelmet extends HeadEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.HEAD;
     }
 }
@@ -164,7 +163,7 @@ final class NoArmor extends TorsoEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.TORSO;
     }
 }
@@ -179,7 +178,7 @@ final class NoTrousers extends LegsEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.LEGS;
     }
 }
@@ -194,7 +193,7 @@ final class NoGloves extends HandsEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.HANDS;
     }
 }
@@ -209,7 +208,7 @@ final class NoBoots extends BootsEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.FEET;
     }
 }
@@ -224,7 +223,7 @@ final class NoShield extends SecondHandEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.SECONDHAND;
     }
 }
@@ -239,9 +238,7 @@ final class NoWeapon extends FirstHandEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
-        return Wearable.FIRSTHAND;
-    }
+    public Wearable getWearable() {return Wearable.FIRSTHAND;}
 }
 
 
@@ -256,7 +253,7 @@ class Helmet extends HeadEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.HEAD;
     }
 }
@@ -271,7 +268,7 @@ final class Armor extends TorsoEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.TORSO;
     }
 }
@@ -285,7 +282,7 @@ final class Trousers extends LegsEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.LEGS;
     }
 }
@@ -299,7 +296,7 @@ final class Gloves extends HandsEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.HANDS;
     }
 }
@@ -313,7 +310,7 @@ final class Boots extends BootsEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.FEET;
     }
 }
@@ -327,7 +324,7 @@ final class Shield extends SecondHandEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.SECONDHAND;
     }
 }
@@ -341,7 +338,7 @@ final class Weapon extends FirstHandEquipment{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.FIRSTHAND;
     }
 }
@@ -372,7 +369,7 @@ final class CraftingItem extends Item{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.NOTHING;
     }
 }
@@ -403,7 +400,7 @@ final class Money extends Item{
     }
 
     @Override
-    public Wearable getWearablePart() {
+    public Wearable getWearable() {
         return Wearable.NOTHING;
     }
 }
