@@ -17,9 +17,9 @@ public abstract class Shop {
 class BasicShop extends Shop{
     public BasicShop(){
         itemsOnSale = new ArrayList<>();
-        itemsOnSale.add(ItemManager.STEEL_HELMET);
-        itemsOnSale.add(ItemManager.STEEL_ARMOR);
-        itemsOnSale.add(ItemManager.STEEL_BOOTS);
+        itemsOnSale.add(ManagerItem.STEEL_HELMET);
+        itemsOnSale.add(ManagerItem.STEEL_ARMOR);
+        itemsOnSale.add(ManagerItem.STEEL_BOOTS);
     }
 
     public String itemsAvailable(){

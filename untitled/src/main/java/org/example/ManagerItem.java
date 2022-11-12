@@ -1,6 +1,6 @@
 package org.example;
 
-class ItemManager {
+class ManagerItem {
     //EQUIPMENT
 
     //VARIOUS CLOTHES

@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 public class Inventory {
     public static int MAX_ITEM_NUMBER = 12;
+    public static int getMaxItemNumber(){ return MAX_ITEM_NUMBER;}
 
     public Inventory(){
         itemList = new ArrayList<>();
@@ -37,9 +38,9 @@ public class Inventory {
         else return false;
     }
 
-    public void addItem(Item item) throws InventoryFullException {
+    public void add(Item item) throws InventoryFullException {
         int itemsnumber = itemList.size();
-        if (itemsnumber < MAX_ITEM_NUMBER) {
+        if (itemsnumber < MAX_ITEM_NUMBER && (item.isEquipment() == true)) {
             itemList.add(item);
         }
         else{
@@ -50,7 +51,7 @@ public class Inventory {
         Iterator<Item> newItemsIterator= itemsToAdd.iterator();
         try {
             while (newItemsIterator.hasNext()) {
-                addItem(newItemsIterator.next());
+                add(newItemsIterator.next());
             }
         }
         catch(InventoryFullException e){
@@ -96,7 +97,6 @@ public class Inventory {
             if (itemList.get(i).getName().equalsIgnoreCase(name)){
                 itemList.remove(i);
                 i = itemList.size();
-                //itemList.trimToSize();
             }
             else{
                 i++;

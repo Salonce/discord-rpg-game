@@ -50,6 +50,9 @@ abstract class Item{
     public abstract boolean isEmptyEquipment();
     public abstract Wearable getWearable();
 
+    public boolean isEquipment(){
+        return !isEmptyEquipment();
+    };
 }
 
 
