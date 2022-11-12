@@ -68,4 +68,6 @@ class ManagerItem {
     public final static Item GABRIELAS_TONGUE = new CraftingItem("Gabriela's tongue", 1, 50);
     public final static Item FINGERHOODS_STORY = new CraftingItem("Fingerhood's story", 100, 0);
 
+    public final static Item FEATHER = new CraftingItem("Feather", 0, 1);
+
 }

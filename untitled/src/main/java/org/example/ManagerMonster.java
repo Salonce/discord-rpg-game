@@ -58,10 +58,12 @@ class ManagerMonster {
 
     public static final Monster CHICK = new Monster.MonsterBuilder("Chick", 1).addDescription("A small chicken that came right out of an egg.")
             .addLoot(ManagerItem.STEEL_SWORD, 10)
+            .addLoot(ManagerItem.FEATHER, 80)
             .build();
 
     public static final Monster SMALL_ROOSTER = new Monster.MonsterBuilder("Small rooster", 2).addDescription("Small cock, a chicken defender.")
             .addLoot(ManagerItem.STEEL_SWORD, 10)
+            .addLoot(ManagerItem.FEATHER, 80)
             .build();
 
     public static final Monster EGG_MONSTER = new Monster.MonsterBuilder("Eggster", 3).addDescription("Strange creature made of eggs. It smells badly.")
@@ -70,6 +72,7 @@ class ManagerMonster {
 
     public static final Monster CHICK_LORD = new Monster.MonsterBuilder("Chick lord", 5).addDescription("Lord among chicks. Has a sharp yellow beak.")
             .addLoot(ManagerItem.STEEL_SWORD, 10)
+            .addLoot(ManagerItem.FEATHER, 80)
             .build();
     /*
           Chancer.chanceItem(newItems, ItemManager.STEEL_SWORD, 60);

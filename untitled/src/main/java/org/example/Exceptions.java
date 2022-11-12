@@ -47,3 +47,9 @@ class NotEnoughActionPointsException extends Exception{
         super(message);
     }
 }
+
+class NotWearableItemException extends Exception{
+    public NotWearableItemException(){
+        super();
+    }
+}

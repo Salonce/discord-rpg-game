@@ -48,11 +48,18 @@ abstract class Item{
     public abstract boolean hasAttack();
     public abstract boolean hasDefense();
     public abstract boolean isEmptyEquipment();
+
     public abstract Wearable getWearable();
 
     public boolean isEquipment(){
         return !isEmptyEquipment();
     };
+    public boolean checkWearable() throws NotWearableItemException {
+        if (!getWearable().equals(Wearable.NOTHING))
+            return true;
+        else
+            throw new NotWearableItemException();
+    }
 }
 
 

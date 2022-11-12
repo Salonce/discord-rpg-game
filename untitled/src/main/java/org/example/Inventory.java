@@ -39,12 +39,13 @@ public class Inventory {
     }
 
     public void add(Item item) throws InventoryFullException {
-        int itemsnumber = itemList.size();
-        if (itemsnumber < MAX_ITEM_NUMBER && (item.isEquipment() == true)) {
-            itemList.add(item);
-        }
-        else{
-            throw new InventoryFullException("Inventory is full. Can't pick up the item.");
+        if (item.isEquipment() == true) {
+            int itemsnumber = itemList.size();
+            if (itemsnumber < MAX_ITEM_NUMBER) {
+                itemList.add(item);
+            } else {
+                throw new InventoryFullException("Inventory is full. Can't pick up the item.");
+            }
         }
     }
     public void addItems(ArrayList<Item> itemsToAdd) throws InventoryFullException {
@@ -103,5 +104,6 @@ public class Inventory {
             }
         }
     }
+
 }
 
