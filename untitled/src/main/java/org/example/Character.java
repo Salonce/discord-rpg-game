@@ -6,9 +6,7 @@ import discord4j.common.util.Snowflake;
 import java.util.HashMap;
 
 class Character implements Fighter{
-    public Character(CharClass charClass, CharRace charRace){
-        this.charClass = charClass;
-        this.charRace = charRace;
+    public Character(){
         this.inventory = new Inventory();
         this.actionPoints = new ActionPoints();
         this.equipment = new Equipment();
@@ -17,12 +15,6 @@ class Character implements Fighter{
 
     private Stats stats;
     public Stats getStats(){return stats;}
-
-    private CharClass charClass;
-    public CharClass getCharClass(){return charClass;}
-
-    private CharRace charRace;
-    public CharRace getCharRace(){return charRace;}
 
     private Equipment equipment;
     public Equipment getEquipment() {return equipment;}
@@ -88,8 +80,8 @@ class CharacterManager {
     public CharacterManager() {
         usersCharacters = new HashMap<>();
     }
-    public void createNewCharacter(Snowflake id, CharClass charClass, CharRace charRace){
-        usersCharacters.put(id, new Character(charClass, charRace));
+    public void createNewCharacter(Snowflake id){
+        usersCharacters.put(id, new Character());
     }
     public Character getCharacterById(Snowflake id) throws NoSuchCharacterException {
         if (usersCharacters.get(id) == null){

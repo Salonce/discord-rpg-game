@@ -101,7 +101,6 @@ abstract class MessageProcessor{
         EmbedCreateSpec embed = EmbedCreateSpec.builder()
                 .author(getUserName(), null, getUserAvatarUrl())
                 .title(message)
-                .timestamp(Instant.now())
                 .build();
         sendMessage(embed);
     }
@@ -157,9 +156,7 @@ class CallCharTester extends MessageProcessor{
     public void process(){
         try {
             if (getContent().equals(".tester") && characterNegativeCheck()){
-                CharClass charClass = CharClassFactory.createClass("archer");
-                CharRace charRace = CharRaceFactory.createRace("human");
-                 getCharacterManager().createNewCharacter(getId(), charClass, charRace);
+                 getCharacterManager().createNewCharacter(getId());
                  getCharacterManager().getCharacterById(getId()).getInventory().add(ManagerItem.STEEL_SHIELD);
                  getCharacterManager().getCharacterById(getId()).getInventory().add(ManagerItem.STEEL_ARMOR);
                  getCharacterManager().getCharacterById(getId()).getInventory().add(ManagerItem.STEEL_SWORD);
@@ -168,8 +165,6 @@ class CallCharTester extends MessageProcessor{
                     .color(Color.BLUE)
                     .author(getUserName() + " - " + "Character created!", null, getUserAvatarUrl())
                     .timestamp(Instant.now())
-                    .addField("Class", charClass.getName(), true)
-                    .addField("Race", charRace.getName(), true)
                     .build();
                  sendMessage(embed);
             }
@@ -181,17 +176,26 @@ class CallCharTester extends MessageProcessor{
 class CallHelp extends MessageProcessor{
     private String getHelp(){
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(".help")
-                .append("\n.tester - create test character")
-                .append("\n.create *class* *race* - create character ")
-                .append("\n.give *other user's ID* - give an item to someone")
-                .append("\n.eq")
-                .append("\n.i")
-                .append("\n.drop")
-                .append("\n.equip")
-                .append("\n.unequip")
+        stringBuilder
+                .append("\n\n**Character creation:**")
+                .append("\n.tester")
+                .append("\n.create")
+
+                .append("\n\n**General:**")
+                .append("\n.info")
                 .append("\n.ap")
-                .append("\n.charinfo")
+                .append("\n.help")
+
+                .append("\n\n**Inventory:**")
+                .append("\n.inv")
+                .append("\n.eq")
+                .append("\n.equip *itemname*")
+                .append("\n.unequip *itemname*")
+                .append("\n.drop *itemname*")
+                .append("\n.give *userID* *itemname*")
+
+                .append("\n\n**Dungeons:**")
+                .append("\n.cave")
                 .append("\n.forest");
 
         return stringBuilder.toString();
@@ -199,11 +203,7 @@ class CallHelp extends MessageProcessor{
     public void process(){
         if (getContent().equals(".help")){
                 EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                        .color(Color.BLUE)
-                        .title("Available commands")
-                        .addField("...", getHelp(), false)
-                        .author(getUserName(), null, getUserAvatarUrl())
-                        .timestamp(Instant.now())
+                        .addField("\u2800", getHelp(), false)
                         .build();
                 sendMessage(embed);
         }
@@ -212,11 +212,9 @@ class CallHelp extends MessageProcessor{
 
 class CallCharInfo extends MessageProcessor{
     public void process(){
-        if (getContent().equals(".charinfo") && characterCheck()){
+        if (getContent().equals(".info") && characterCheck()){
             EmbedCreateSpec embed = EmbedCreateSpec.builder()
                 .color(Color.BLUE)
-                .addField("Class ", getCharacter().getCharClass().getName(), true)
-                .addField("Race ", getCharacter().getCharRace().getName(), true)
                 .addField("Combat power ", String.valueOf(getCharacter().getCombatPower()), true)
                 .addField("Action Points ", String.valueOf(getCharacter().getActionPoints().getCurrentAP()) + "/" + ActionPoints.MAX_AP, true)
                 .author(getUserName(), null, getUserAvatarUrl())
@@ -228,29 +226,12 @@ class CallCharInfo extends MessageProcessor{
 }
 
 class CallCreateCharacter extends MessageProcessor {
-    private EmbedCreateSpec.Builder getErrorEmbedBuilder() {
-        return EmbedCreateSpec.builder()
-                .color(Color.BLUE)
-                .author(getUserName(), null, getUserAvatarUrl())
-                .timestamp(Instant.now());
-    }
-
     public void process() {
         try {
-            String[] content = getContent().split(" ", 3);
-            if (content[0].equals(".create") && characterNegativeCheck()) {
-                CharClass charClass = CharClassFactory.createClass(content[1]);
-                CharRace charRace = CharRaceFactory.createRace(content[2]);
-                getCharacterManager().createNewCharacter(getId(), charClass, charRace);
-                EmbedCreateSpec.Builder embedBuilder = getErrorEmbedBuilder().title("Character created!")
-                    .addField("Class", charClass.getName(), true)
-                    .addField("Race", charRace.getName(), true);
-                sendMessage(embedBuilder.build());
+            if (getContent().equals(".create") && characterNegativeCheck()) {
+                getCharacterManager().createNewCharacter(getId());
+                sendMessage("Character created!");
             }
-        } catch (IllegalCharacterClassException e) {
-            sendMessage("Illegal class name!");
-        } catch (IllegalCharacterRaceException e) {
-            sendMessage("Illegal race name!!");
         } catch (Exception e) {
         }
     }
@@ -398,14 +379,54 @@ class CallShop extends MessageProcessor{
 
 class CallI extends MessageProcessor{
     final static int INV_MAX_CHAR = 15;
+/*
     public void process(){
         if (getContent().equals(".i") && characterCheck()){
             EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
                     .color(Color.BROWN)
                     .author(getUserName() + " : Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")", null, getUserAvatarUrl())
-                    .addField("Total"
-                            , ":coin: " + getCharacter().getInventory().getMoney()
-                                    + " :scales: " + getCharacter().getInventory().getItemsWeight(), false)
+                    .thumbnail("https://openclipart.org/image/800px/330656");
+
+            StringBuilder stringBuilder = new StringBuilder("\u2800");
+            for (Item item : getCharacter().getInventory().getItemList()){
+                stringBuilder.append(getItemInfo(item));
+            }
+            embedBuilder.addField("\u2800", stringBuilder.toString(), false);
+            sendMessage(embedBuilder.build());
+        }
+    }
+
+    private String getItemInfo(Item item){
+        int empty = 0;
+        StringBuilder stringBuilder = new StringBuilder("\n");
+        stringBuilder.append("\u2800\u2800:coin: " + item.getValue());
+        stringBuilder.append("\u2800\u2800:scales: " + item.getWeight());
+        //if (item.hasAttack())
+            stringBuilder.append("\u2800\u2800 :axe: " + item.getAttack());
+        //else
+        //    empty++;
+        //if (item.hasDefense()){
+            stringBuilder.append("\u2800\u2800:shield: " + item.getDefence());
+        //} else
+        //    empty++;
+        //int a = 0;
+        //while (a < empty){
+        //    stringBuilder.append("\n\u2800");
+        //    a++;
+        //}
+        stringBuilder.append("\u2800\u2800" + item.getName());
+        return stringBuilder.toString();
+    }
+     */
+
+    public void process(){
+        if (getContent().equals(".i") && characterCheck()){
+            EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
+                    .color(Color.BROWN)
+                    .author(getUserName() + " : Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")", null, getUserAvatarUrl())
+                    //.addField("Total"
+                    //        , ":coin: " + getCharacter().getInventory().getMoney()
+                    //                + " :scales: " + getCharacter().getInventory().getItemsWeight(), false)
                     .thumbnail("https://openclipart.org/image/800px/330656");
             for (Item item : getCharacter().getInventory().getItemList()){
                 embedBuilder.addField(addSpaces(item.getName(), INV_MAX_CHAR), getItemInfo(item), true);
@@ -417,7 +438,7 @@ class CallI extends MessageProcessor{
         int empty = 0;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\n:coin: " + item.getValue());
-        stringBuilder.append("\n:scales: " + item.getWeight());
+        //stringBuilder.append("\n:scales: " + item.getWeight());
         stringBuilder.append("\n\u2800");
         if (item.hasAttack())
             stringBuilder.append("\n:axe: " + item.getAttack());
@@ -434,6 +455,7 @@ class CallI extends MessageProcessor{
         }
         return stringBuilder.toString();
     }
+
 }
 
 class CallEquipmentInfo extends MessageProcessor{
@@ -472,7 +494,7 @@ class CallEquipmentInfo extends MessageProcessor{
 }
 
 class CallRat extends MessageProcessor{
-    private final static int AP_FOR_QUEST = 2;
+    private final static int AP_FOR_QUEST = 1;
     public void process(){
         Dungeon dungeon = getDungeon(getContent());
         try {
@@ -495,9 +517,9 @@ class CallRat extends MessageProcessor{
                 sendMessage(embedBuilder.build());
             }
         } catch (InventoryFullException e){
-            sendMessage("not all looted");
+            sendMessage("Not all looted");
         } catch (NoSuchMonsterException e) {
-            sendMessage("no luck finding a monster");
+            sendMessage("You haven't found find anything!");
         } catch (NotEnoughActionPointsException e) {
             sendMessage("You need 2 action points to do that!");
         }

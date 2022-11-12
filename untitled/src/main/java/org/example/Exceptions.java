@@ -30,18 +30,6 @@ class NoSuchCharacterException extends Exception{
     }
 }
 
-class IllegalCharacterRaceException extends Exception{
-    public IllegalCharacterRaceException(String message){
-        super(message);
-    }
-}
-
-class IllegalCharacterClassException extends Exception{
-    public IllegalCharacterClassException(String message){
-        super(message);
-    }
-}
-
 class NotEnoughActionPointsException extends Exception{
     public NotEnoughActionPointsException(String message){
         super(message);
