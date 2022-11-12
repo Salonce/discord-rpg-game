@@ -482,22 +482,17 @@ class CallI extends AnsweringHelper{
         }
         return stringBuilder.toString();
     }
+
     public void processMessage(){
         if (getContent().equals("?i")){
             if (characterCheck()) {
                 EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
                         .color(Color.BROWN)
-                        //.title("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")")
                         .addField("Total"
-                                //, ":coin: " + getCharacter().getInventory().getItemsValue()
                                 , ":coin: " + getCharacter().getInventory().getMoney()
                                         + " :scales: " + getCharacter().getInventory().getItemsWeight(), false)
-                        //.addField("Total"
-                        //        , ":coin: " + getCharacter().getInventory().getItemsValue()
-                        //        + "\n:scales: " + getCharacter().getInventory().getItemsWeight(), false)
                         .author(getUserName() + " : Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")", null, getUserAvatarUrl())
                         .thumbnail("https://openclipart.org/image/800px/330656");
-                //.timestamp(Instant.now());
                 for (Item item : getCharacter().getInventory().getItemList()){
                     embedBuilder.addField(addSpaces(item.getName(), INV_MAX_CHAR), getItemInfo(item), true);
                 }
@@ -588,6 +583,8 @@ class CallRat extends AnsweringHelper{
                 return DungeonManager.CHESTPLACE;
             case "?server":
                 return DungeonManager.SERVER;
+            case "?cave":
+                return DungeonManager.CHICKEN_CAVE;
             default:
                 return null;
         }
@@ -633,7 +630,6 @@ class AnswerManager {
         messageProcessingArrayList.add(new CallCreation());
         messageProcessingArrayList.add(new CallPing());
         messageProcessingArrayList.add(new CallCreateCharacter());
-        //messageProcessingArrayList.add(new CallLootChest());
         messageProcessingArrayList.add(new CallCharTester());
         messageProcessingArrayList.add(new CallCooldowns());
         messageProcessingArrayList.add(new CallShop());
@@ -675,300 +671,3 @@ class AnswerManager {
         }
     }
 }
-
-/*
-    protected MessageChannel getMessageChannel(Message message){
-        return message.getChannel().block();
-    }
-    protected String getMessageContent(Message message){
-        return message.getContent();
-    }
-*/
-
-//Character character = characterManager.getCharacterById(message.getAuthor().get().getId());
-/*
-                System.out.println("processing starts...");
-                messageProcessingArrayList.forEach((call) -> {
-                    System.out.println("executing...");
-                    stop = call.processMessage(message, characterManager);
-                    if (stop == true) {
-                        throw new RuntimeException();
-                    }
-                });
-*/
-
-/*
-                Iterator<MessageProcessingMachine> messageProcessingMachine = messageProcessingArrayList.iterator();
-                messageProcessingMachine.forEachRemaining(call -> {
-                    System.out.println("executing...");
-                    if(call.processMessage(message, characterManager)){
-                        throw new RuntimeException();
-                    };
-                });
-
- */
-
-
-//for (MessageProcessingMachine messageProcessingMachine : messageProcessingArrayList) {
-//    System.out.println("executing...");
-//    if (messageProcessingMachine.processMessage(message, characterManager)) {
-//         break;
-//    }
-//}
-//System.out.println("processing finishes...");
-
-
-
-/*
-
-abstract class Answer{
-    abstract MessageChannel getMessageChannel(Message message);
-    abstract String getMessageString(Message message);
-    public void send(Message message){
-        getMessageChannel().createMessage(getMessageString(message)).block();
-    }
-}
-class AnswerHelp extends Answer{
-    MessageChannel getMessageChannel(Message message){
-        return message.getChannel().block();
-    }
-    String getMessageString(Message message){
-        return "Available commands: ?help, ?created, ?ping, ?eq";
-    }
-}
-class AnswerCreation extends Answer {
-    MessageChannel getMessageChannel(Message message){
-        return message.getChannel().block();
-    }
-    String getMessageString(Message message){
-        return "The bot was created in 2022!";
-    }
-}
-
-class AnswerPing extends Answer {
-    MessageChannel getMessageChannel(Message message){
-        return message.getChannel().block();
-    }
-    String getMessageString(Message message){
-        return "Pong!";
-    }
-}
-
-class AnswerManager{
-
-    public static void sendAnswer(Message message){
-        if (message.getContent().equals("?help")) {
-            Answer answer = new AnswerHelp();
-            answer.send(message);
-        }
-        else if (message.getContent().equals("?ping")) {
-            Answer answer = new AnswerPing();
-            answer.send(message);
-        }
-        else if (message.getContent().equals("?created")) {
-            Answer answer = new AnswerCreation();
-            answer.send(message);
-        }
-        //answer.send(message) here instead of all above
-    }
-}
-
-
-/*
-class CallInventory extends AnsweringHelper{
-    public void processMessage(){
-        if (getContent().equals("?inventory")){
-            if (characterCheck()) {
-                StringBuilder inventoryNamesOutput = new StringBuilder(1023);
-                inventoryNamesOutput.append("Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ") (w - weight, v - value): \n");
-                for (String string : getCharacter().getInventory().getItemNamesWeightValues()) {
-                    inventoryNamesOutput.append(string + ",\n");
-                }
-                inventoryNamesOutput.append("Total (w: " + getCharacter().getInventory().getItemsWeight());
-                inventoryNamesOutput.append(", v: " + getCharacter().getInventory().getItemsValue() + ")");
-                sendMessage(getMessageChannel(), inventoryNamesOutput.toString());
-            }
-        }
-    }
-}
- */
-
-
-
-
-
-
-/*
-class AnswerAAA extends Answer {
-
-    MessageChannel getMessageChannel(Message message){
-        return message.getChannel().block();
-    }
-    String getMessageString(Message message){
-        return "Pong!";
-    }
-}
-*/
-//AnswerFactory.sendAnswer(message);
-
-
-
-
-
-
-/*
-class AnswerHelp implements Answerable {
-    public String answer(Message message){
-        if ("?help".equals(message.getContent())){
-            final MessageChannel channel = message.getChannel().block();
-            return "Available commands: ?help, ?created, ?ping, ?eq";
-        }
-        else return null;
-    }
-}
-
-
-class AnswerCreation implements Answerable {
-    public String answer(Message message){
-        if ("?created".equals(message.getContent())){
-            final MessageChannel channel = message.getChannel().block();
-            return "The bot was created in 2022!";
-        }
-        else return null;
-    }
-}
-
-class AnswerPing implements Answerable {
-    public String answer(Message message){
-        if ("?ping".equals(message.getContent())){
-
-
-            final MessageChannel channel = message.getChannel().block();
-            channel.createMessage("Pong!").block();
-
-
-            SteelHelmet steelHelmet = new SteelHelmet();
-            Dressable head = new Head();
-            head.dress(steelHelmet);
-        }
-    }
-}
-
-class AnswerEquipment implements Answerable {
-    public String answer(Message message){
-        if ("?eq".equals(message.getContent())){
-            final MessageChannel channel = message.getChannel().block();
-            //channel.createMessage("Pong!").block();
-
-            try {
-                Snowflake userId = message.getAuthor().get().getId();
-
-            }
-            catch (NoSuchElementException e){
-
-            }
-
-            SteelHelmet steelHelmet = new SteelHelmet();
-            Dressable head = new Head();
-            head.dress(steelHelmet);
-
-            channel.createMessage(head.dress(steelHelmet)).block();
-        }
-    }
-}
-*/
-
-
-
-
-/*
-class MessageManagerrr{
-
-    private Message message;
-    private MessageChannel channel;
-    private String outputString;
-
-    public void setInputMessage(Message message){
-        this.message = message;
-    }
-    public void setChannel(MessageChannel channel){
-        this.channel = channel;
-    }
-    public void setOutputString(String outputString){
-        this.outputString = outputString;
-    }
-
-    //MessageChannel getMessChannel(Message message){
-    //    return message.getChannel().block();
-    //}
-
-    String getResponse(Answerable answerable){
-        return answerable.answer(message);
-    }
-
-    public void createMessage(){
-        channel.createMessage(outputString).block();
-    }
-}
- */
-
-
-
-/*
-class AnswerHelp implements Answerable {
-    public void answer(Message message){
-        if ("?help".equals(message.getContent())){
-            final MessageChannel channel = message.getChannel().block();
-            channel.createMessage("Available commands: ?help, ?created, ?ping, ?eq").block();
-        }
-    }
-}
-
-
-class AnswerCreation implements Answerable {
-    public void answer(Message message){
-        if ("?created".equals(message.getContent())){
-            final MessageChannel channel = message.getChannel().block();
-            channel.createMessage("The bot was created in 2022!").block();
-        }
-    }
-}
-class AnswerPing implements Answerable {
-    public void answer(Message message){
-        if ("?ping".equals(message.getContent())){
-
-
-            final MessageChannel channel = message.getChannel().block();
-            channel.createMessage("Pong!").block();
-
-
-            SteelHelmet steelHelmet = new SteelHelmet();
-            Dressable head = new Head();
-            head.dress(steelHelmet);
-        }
-    }
-}
-
-class AnswerEquipment implements Answerable {
-    public void answer(Message message){
-        if ("?eq".equals(message.getContent())){
-            final MessageChannel channel = message.getChannel().block();
-            //channel.createMessage("Pong!").block();
-
-            try {
-                Snowflake userId = message.getAuthor().get().getId();
-
-            }
-            catch (NoSuchElementException e){
-
-            }
-
-            SteelHelmet steelHelmet = new SteelHelmet();
-            Dressable head = new Head();
-            head.dress(steelHelmet);
-
-            channel.createMessage(head.dress(steelHelmet)).block();
-        }
-    }
-}
-*/

@@ -41,3 +41,9 @@ class IllegalCharacterClassException extends Exception{
         super(message);
     }
 }
+
+class NotEnoughActionPointsException extends Exception{
+    public NotEnoughActionPointsException(String message){
+        super(message);
+    }
+}

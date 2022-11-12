@@ -89,9 +89,3 @@ class ActionPoints{
     }
     */
 }
-
-class NotEnoughActionPointsException extends Exception{
-    public NotEnoughActionPointsException(String message){
-        super(message);
-    }
-}

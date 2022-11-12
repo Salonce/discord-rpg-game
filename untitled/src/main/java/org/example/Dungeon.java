@@ -50,34 +50,6 @@ class Dungeon{
     }
 }
 
-class DungeonManager{
-    public static final Dungeon CAVE = new Dungeon.DungeonBuilder().addMonster(MonsterManager.RAT, 50).build();
-
-    public static final Dungeon FOREST = new Dungeon.DungeonBuilder()
-            .addMonster(MonsterManager.RAT, 30)
-            .addMonster(MonsterManager.BUTTERFLY, 30)
-            .addMonster(MonsterManager.SQUIRREL, 10)
-            .addMonster(MonsterManager.WOLF, 10)
-            .addMonster(MonsterManager.BEAR, 14)
-            .addMonster(MonsterManager.DRAGON, 5)
-            .build();
-
-    public static final Dungeon SERVER = new Dungeon.DungeonBuilder()
-            .addMonster(MonsterManager.FINGERHOOD, 50)
-            .addMonster(MonsterManager.GABRIELA, 50)
-            .build();
-
-    public static final Dungeon CHESTPLACE = new Dungeon.DungeonBuilder().addMonster(MonsterManager.CHEST, 100).build();
-
-    public static final Dungeon SHIP = new Dungeon.DungeonBuilder().addMonster(MonsterManager.SQUIRREL, 100).build();
-
-    public static final Dungeon LAKE = new Dungeon.DungeonBuilder().addMonster(MonsterManager.DOLPHIN, 1).build();
-
-
-}
-
-
-
 
 //one class for different Dungeons (to read names by it)
 //Dungeon Manager list function to get the Dungeon based off the command
