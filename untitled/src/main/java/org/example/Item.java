@@ -54,12 +54,12 @@ abstract class Item{
     public boolean isEquipment(){
         return !isEmptyEquipment();
     };
-    public boolean checkWearable() throws NotWearableItemException {
-        if (!getWearable().equals(Wearable.NOTHING))
-            return true;
-        else
-            throw new NotWearableItemException();
-    }
+    //public boolean checkWearable() throws NotWearableItemException {
+    //    if (!getWearable().equals(Wearable.NOTHING))
+    //        return true;
+    //    else
+    //        throw new NotWearableItemException();
+    //}
 }
 
 

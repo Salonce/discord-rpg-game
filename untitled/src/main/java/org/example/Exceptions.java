@@ -41,3 +41,9 @@ class NotWearableItemException extends Exception{
         super();
     }
 }
+
+class GhostItemException extends Exception{
+    public GhostItemException(){
+        super();
+    }
+}

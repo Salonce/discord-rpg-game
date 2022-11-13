@@ -24,6 +24,9 @@ public class Inventory {
     public void setMoney(int money){
         this.money = money;
     }
+    public void addMoney(int money){
+        this.money =+ money;
+    }
 
     //private int maxWeight;
 
@@ -38,7 +41,8 @@ public class Inventory {
         else return false;
     }
 
-    public void add(Item item) throws InventoryFullException {
+    //return true if an item was added succesfully
+    public boolean add(Item item) throws InventoryFullException {
         if (item.isEquipment() == true) {
             int itemsnumber = itemList.size();
             if (itemsnumber < MAX_ITEM_NUMBER) {
@@ -46,6 +50,10 @@ public class Inventory {
             } else {
                 throw new InventoryFullException("Inventory is full. Can't pick up the item.");
             }
+            return true;
+        }
+        else{
+            return false;
         }
     }
     public int addItems(ArrayList<Item> itemsToAdd) throws InventoryFullException {
@@ -95,18 +103,17 @@ public class Inventory {
         throw new NoSuchItemException();
     }
 
-    public void remove(String name){
+    public void remove(String name) throws NoSuchItemException {
         int i = 0;
         while(i < itemList.size()){
             if (itemList.get(i).getName().equalsIgnoreCase(name)){
                 itemList.remove(i);
-                i = itemList.size();
+                return;
             }
             else{
                 i++;
             }
         }
+        throw new NoSuchItemException();
     }
-
 }
-

@@ -104,6 +104,12 @@ abstract class MessageProcessor{
                 .build();
         sendMessage(embed);
     }
+    protected static void sendPlainMessage(String message){
+        EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                .addField("\u2800", message, false)
+                .build();
+        sendMessage(embed);
+    }
 
     protected static String addSpaces(String string, int maxWidth){
         StringBuilder stringBuilder = new StringBuilder(string);
@@ -113,9 +119,7 @@ abstract class MessageProcessor{
         return stringBuilder.toString();
     }
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CallGive extends MessageProcessor{
@@ -128,12 +132,8 @@ class CallGive extends MessageProcessor{
                 Item item = getCharacter().getInventory().get(itemName);
                 getCharacterManager().getCharacterById(secondId).getInventory().add(item);
                 getCharacter().getInventory().removeItem(item);
-                EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                        //secondId can be null
-                        .author(getUserName() + " gives " + itemName + " to " + getUsernameBySnowflake(secondId), null, getUserAvatarUrl())
-                        .color(Color.RED)
-                        .build();
-                sendMessage(embed);
+
+                sendMessage(getUserName() + " gives " + itemName + " to " + getUsernameBySnowflake(secondId));
             }
         } catch (NoSuchCharacterException ex) {
             sendMessage("Make a character first!");
@@ -161,12 +161,7 @@ class CallCharTester extends MessageProcessor{
                  getCharacterManager().getCharacterById(getId()).getInventory().add(ManagerItem.STEEL_ARMOR);
                  getCharacterManager().getCharacterById(getId()).getInventory().add(ManagerItem.STEEL_SWORD);
 
-                EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                    .color(Color.BLUE)
-                    .author(getUserName() + " - " + "Character created!", null, getUserAvatarUrl())
-                    .timestamp(Instant.now())
-                    .build();
-                 sendMessage(embed);
+                 sendMessage("Character created!");
             }
         } catch(Exception e){
         }
@@ -202,10 +197,7 @@ class CallHelp extends MessageProcessor{
     }
     public void process(){
         if (getContent().equals(".help")){
-                EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                        .addField("\u2800", getHelp(), false)
-                        .build();
-                sendMessage(embed);
+            sendPlainMessage(getHelp());
         }
     }
 }
@@ -236,30 +228,17 @@ class CallCreateCharacter extends MessageProcessor {
         }
     }
 }
-
 class CallEquip extends MessageProcessor{
     public void process(){
         try{
             String[] content = getContent().split(" ", 2);
-            String itemName = content[1];
             if (content[0].equals(".equip") && characterCheck()){
-                Item itemOn = getCharacter().getInventory().get(itemName);
-                itemOn.checkWearable();
-                Item itemOff = getCharacter().getEquipment().get(itemOn.getWearable());
-                if (getCharacter().getEquipment().equip(itemOn)) {
-                    getCharacter().getInventory().remove(itemName);
-                    getCharacter().getInventory().add(itemOff);
-                }
-                EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                    .author(getUserName() + " equipped " + itemOn.getName(), null, getUserAvatarUrl())
-                    .color(Color.RED)
-                    .build();
-                sendMessage(embed);
+
+                Relocator.equip(getCharacter(), content[1]);
+                sendMessage(getUserName() + " equipped " + content[1]);
             }
         } catch (NoSuchItemException e){
             sendMessage("You don't have this item in your inventory!");
-        } catch (NotWearableItemException e){
-            sendMessage("You can't wear this item!");
         }
         catch (Exception e){
             //sendMessage("Was");
@@ -267,51 +246,14 @@ class CallEquip extends MessageProcessor{
     }
 }
 
-class CallDrop extends MessageProcessor{
-    public void process(){
-        try{
-            String[] content = getContent().split(" ", 2);
-            if (content[0].equals(".drop") && characterCheck()){
-                String itemName = content[1];
-                Item itemToDrop = getCharacter().getInventory().get(itemName);
-                getCharacter().getInventory().remove(itemName);
-                EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                    .author(getUserName() + " dropped " + itemToDrop.getName(), null, getUserAvatarUrl())
-                    .color(Color.RED)
-                    .build();
-                sendMessage(embed);
-            }
-        } catch (NoSuchItemException e){
-            sendMessage("You don't have that item in your inventory!");
-        } catch (Exception e){
-        }
-    }
-}
-
 class CallUnequip extends MessageProcessor{
-    /*
-        public void print(String itemName){
-            EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                    .author(getUserName() + " unequipped " + itemName, null, getUserAvatarUrl())
-                    .color(Color.RED)
-                    .build();
-            sendMessage(embed);
-        }
-     */
-
     public void process(){
         try{
             String[] content = getContent().split(" ", 2);
             if (content[0].equals(".unequip") && characterCheck()) {
-                String itemName = content[1];
-                Item item = getCharacter().getEquipment().get(itemName);
-                getCharacter().getEquipment().remove(itemName);
-                getCharacter().getInventory().add(item);
-                EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                    .author(getUserName() + " unequipped " + item.getName(), null, getUserAvatarUrl())
-                    .color(Color.RED)
-                    .build();
-                sendMessage(embed);
+
+                Relocator.takeOff(getCharacter(), content[1]);
+                sendMessage(getUserName() + " unequipped " + content[1]);
             }
         }
         catch (IndexOutOfBoundsException e){
@@ -321,26 +263,30 @@ class CallUnequip extends MessageProcessor{
     }
 }
 
-class CallSell extends MessageProcessor{
-    private void sendMsg(String soldItemName, int soldItemValue){
-        EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                .author(getUserName() + " sold " + soldItemName + " for " + soldItemValue, null, getUserAvatarUrl())
-                .color(Color.RED)
-                .build();
-        sendMessage(embed);
-    }
+class CallDrop extends MessageProcessor{
+    public void process(){
+        try{
+            String[] content = getContent().split(" ", 2);
+            if (content[0].equals(".drop") && characterCheck()){
 
+                Relocator.drop(getCharacter(), content[1]);
+                sendMessage(getUserName() + " dropped " + content[1]);
+            }
+        } catch (NoSuchItemException e){
+            sendMessage("You don't have that item in your inventory!");
+        } catch (Exception e){
+        }
+    }
+}
+
+class CallSell extends MessageProcessor{
     public void process(){
         try{
             String[] content = getContent().split(" ", 2);
             if (content[0].equalsIgnoreCase(".sell") && characterCheck()){
-                String itemName = content[1];
-                Item itemToSell = getCharacter().getInventory().get(content[1]);
 
-                getCharacter().getInventory().remove(itemName);
-                getCharacter().getInventory().setMoney(getCharacter().getInventory().getMoney() + itemToSell.getValue());
-
-                sendMsg(itemToSell.getName(), itemToSell.getValue());
+                int cash = Relocator.sell(getCharacter(), content[1]);
+                sendMessage(getUserName() + " sold " + content[1] + " for " + cash);
             }
         } catch (NoSuchItemException e){
             sendMessage("You don't have this item!");
@@ -359,21 +305,27 @@ class CallPing extends MessageProcessor{
 
 class CallCooldowns extends MessageProcessor{
     final static int AP_MAX_CHAR = 13;
+    private String getField(){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+                .append("**Available**: " + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP + " (next in "  + (getCharacter().getActionPoints().getFirstCD()) + "s)")
+                .append("\n")
+                .append("\n**Regeneration**: 1 per " + getCharacter().getActionPoints().AP_RECOVERY_TIME + "s");
+
+        return stringBuilder.toString();
+    }
+
     public void process(){
         if (getContent().equals(".ap") && characterCheck()){
             EmbedCreateSpec embed = EmbedCreateSpec.builder()
-                .color(Color.BLUE)
-                .author(getUserName() + " - action points", null, getUserAvatarUrl())
-                .addField("Available: ", getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP , false)
-                .addField("Recovery time: ",  String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME) , false)
-                .addField("Next AP in: ", String.valueOf(getCharacter().getActionPoints().getFirstCD()) , false)
-                .addField("All AP in: " , String.valueOf(getCharacter().getActionPoints().getLastCD()) , false)
-                //.addField(addSpaces("Available", AP_MAX_CHAR), getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP, true)
-                //.addField(addSpaces("Recovery time", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME), true)
-                //.addField(addSpaces("Next AP in ", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().getFirstCD()), true)
-                //.addField(addSpaces("All AP in ", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().getLastCD()), true)
-                //.thumbnail("https://openclipart.org/image/800px/330656")
-                .build();
+                    .color(Color.BLUE)
+                    .author(getUserName() + " - action points", null, getUserAvatarUrl())
+                    .addField("\u2800", getField(), false)
+                    //.addField("Recovery time: ",  String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME) , false)
+                    //.addField("Next AP in: ", String.valueOf(getCharacter().getActionPoints().getFirstCD()) , false)
+                    //.addField("All AP in: " , String.valueOf(getCharacter().getActionPoints().getLastCD()) , false)
+                    //.thumbnail("https://openclipart.org/image/800px/330656")
+                    .build();
             sendMessage(embed);
         }
     }
@@ -389,45 +341,6 @@ class CallShop extends MessageProcessor{
 
 class CallI extends MessageProcessor{
     final static int INV_MAX_CHAR = 15;
-/*
-    public void process(){
-        if (getContent().equals(".i") && characterCheck()){
-            EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
-                    .color(Color.BROWN)
-                    .author(getUserName() + " : Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")", null, getUserAvatarUrl())
-                    .thumbnail("https://openclipart.org/image/800px/330656");
-
-            StringBuilder stringBuilder = new StringBuilder("\u2800");
-            for (Item item : getCharacter().getInventory().getItemList()){
-                stringBuilder.append(getItemInfo(item));
-            }
-            embedBuilder.addField("\u2800", stringBuilder.toString(), false);
-            sendMessage(embedBuilder.build());
-        }
-    }
-
-    private String getItemInfo(Item item){
-        int empty = 0;
-        StringBuilder stringBuilder = new StringBuilder("\n");
-        stringBuilder.append("\u2800\u2800:coin: " + item.getValue());
-        stringBuilder.append("\u2800\u2800:scales: " + item.getWeight());
-        //if (item.hasAttack())
-            stringBuilder.append("\u2800\u2800 :axe: " + item.getAttack());
-        //else
-        //    empty++;
-        //if (item.hasDefense()){
-            stringBuilder.append("\u2800\u2800:shield: " + item.getDefence());
-        //} else
-        //    empty++;
-        //int a = 0;
-        //while (a < empty){
-        //    stringBuilder.append("\n\u2800");
-        //    a++;
-        //}
-        stringBuilder.append("\u2800\u2800" + item.getName());
-        return stringBuilder.toString();
-    }
-     */
 
     public void process(){
         if (getContent().equals(".i") && characterCheck()){
@@ -631,3 +544,63 @@ class AnswerManager {
         }
     }
 }
+
+/*
+    public void process(){
+        if (getContent().equals(".i") && characterCheck()){
+            EmbedCreateSpec.Builder embedBuilder = EmbedCreateSpec.builder()
+                    .color(Color.BROWN)
+                    .author(getUserName() + " : Inventory (" + getCharacter().getInventory().getSize() + "/" + Inventory.MAX_ITEM_NUMBER + ")", null, getUserAvatarUrl())
+                    .thumbnail("https://openclipart.org/image/800px/330656");
+
+            StringBuilder stringBuilder = new StringBuilder("\u2800");
+            for (Item item : getCharacter().getInventory().getItemList()){
+                stringBuilder.append(getItemInfo(item));
+            }
+            embedBuilder.addField("\u2800", stringBuilder.toString(), false);
+            sendMessage(embedBuilder.build());
+        }
+    }
+
+    private String getItemInfo(Item item){
+        int empty = 0;
+        StringBuilder stringBuilder = new StringBuilder("\n");
+        stringBuilder.append("\u2800\u2800:coin: " + item.getValue());
+        stringBuilder.append("\u2800\u2800:scales: " + item.getWeight());
+        //if (item.hasAttack())
+            stringBuilder.append("\u2800\u2800 :axe: " + item.getAttack());
+        //else
+        //    empty++;
+        //if (item.hasDefense()){
+            stringBuilder.append("\u2800\u2800:shield: " + item.getDefence());
+        //} else
+        //    empty++;
+        //int a = 0;
+        //while (a < empty){
+        //    stringBuilder.append("\n\u2800");
+        //    a++;
+        //}
+        stringBuilder.append("\u2800\u2800" + item.getName());
+        return stringBuilder.toString();
+    }
+     */
+
+
+        /*
+        if (getContent().equals(".ap") && characterCheck()){
+            EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                .color(Color.BLUE)
+                .author(getUserName() + " - action points", null, getUserAvatarUrl())
+                .addField("Available: ", getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP , false)
+                .addField("Recovery time: ",  String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME) , false)
+                .addField("Next AP in: ", String.valueOf(getCharacter().getActionPoints().getFirstCD()) , false)
+                .addField("All AP in: " , String.valueOf(getCharacter().getActionPoints().getLastCD()) , false)
+                //.addField(addSpaces("Available", AP_MAX_CHAR), getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP, true)
+                //.addField(addSpaces("Recovery time", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME), true)
+                //.addField(addSpaces("Next AP in ", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().getFirstCD()), true)
+                //.addField(addSpaces("All AP in ", AP_MAX_CHAR), String.valueOf(getCharacter().getActionPoints().getLastCD()), true)
+                //.thumbnail("https://openclipart.org/image/800px/330656")
+                .build();
+            sendMessage(embed);
+        }
+        */

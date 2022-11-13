@@ -61,37 +61,30 @@ class Equipment{
                 +secondHandEquipment.getWeight();
     }
 
-    public boolean equip(Item item){
+    public void equip(Item item) throws NotWearableItemException {
         if (item.getWearable() == Wearable.HEAD){
             headEquipment = item;
-            return true;
         }
         else if (item.getWearable() == Wearable.TORSO){
             torsoEquipment = item;
-            return true;
         }
         else if (item.getWearable() == Wearable.LEGS){
             legsEquipment = item;
-            return true;
         }
         else if (item.getWearable() == Wearable.FEET){
             feetEquipment = item;
-            return true;
         }
         else if (item.getWearable() == Wearable.HANDS){
             handsEquipment = item;
-            return true;
         }
         else if (item.getWearable() == Wearable.FIRSTHAND){
             firstHandEquipment = item;
-            return true;
         }
         else if (item.getWearable() == Wearable.SECONDHAND){
             secondHandEquipment = item;
-            return true;
         }
         else
-            return false;
+            throw new NotWearableItemException();
     }
 
     public Item get(String name) throws NoSuchItemException {
@@ -158,36 +151,37 @@ class Equipment{
         else return null;
     }
 
-    public boolean remove(String name){
+    public Item remove(String name) {
+        Item item = null;
         if (headEquipment.getName().equalsIgnoreCase(name)){
-            this.headEquipment = ManagerItem.NO_HELMET;
-            return true;
+            item = headEquipment;
+                this.headEquipment = ManagerItem.NO_HELMET;
         }
         else if (torsoEquipment.getName().equalsIgnoreCase(name)){
-            this.torsoEquipment = ManagerItem.NO_ARMOR;
-            return true;
+            item = torsoEquipment;
+                this.torsoEquipment = ManagerItem.NO_ARMOR;
         }
         else if (legsEquipment.getName().equalsIgnoreCase(name)){
-            this.legsEquipment = ManagerItem.NO_TROUSERS;
-            return true;
+            item = legsEquipment;
+                this.legsEquipment = ManagerItem.NO_TROUSERS;
         }
         else if (handsEquipment.getName().equalsIgnoreCase(name)){
-            this.handsEquipment = ManagerItem.NO_GLOVES;
-            return true;
+            item = handsEquipment;
+                this.handsEquipment = ManagerItem.NO_GLOVES;
         }
         else if (feetEquipment.getName().equalsIgnoreCase(name)){
-            this.feetEquipment = ManagerItem.NO_BOOTS;
-            return true;
+            item = feetEquipment;
+                this.feetEquipment = ManagerItem.NO_BOOTS;
         }
         else if (firstHandEquipment.getName().equalsIgnoreCase(name)){
-            this.firstHandEquipment = ManagerItem.NO_WEAPON;
-            return true;
+            item = firstHandEquipment;
+                this.firstHandEquipment = ManagerItem.NO_WEAPON;
         }
         else if (secondHandEquipment.getName().equalsIgnoreCase(name)){
-            this.secondHandEquipment = ManagerItem.NO_SHIELD;
-            return true;
+            item = secondHandEquipment;
+                this.secondHandEquipment = ManagerItem.NO_SHIELD;
         }
-        return false;
+        return item;
     }
 
     public Item getHeadEquipment() {
