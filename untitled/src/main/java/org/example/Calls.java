@@ -289,6 +289,16 @@ class CallDrop extends MessageProcessor{
 }
 
 class CallUnequip extends MessageProcessor{
+    /*
+        public void print(String itemName){
+            EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                    .author(getUserName() + " unequipped " + itemName, null, getUserAvatarUrl())
+                    .color(Color.RED)
+                    .build();
+            sendMessage(embed);
+        }
+     */
+
     public void process(){
         try{
             String[] content = getContent().split(" ", 2);
@@ -507,13 +517,14 @@ class CallRat extends MessageProcessor{
                     .color(Color.BLUE)
                     .author(getUserName() + " uses " + AP_FOR_QUEST + " action points", null, getUserAvatarUrl())
                     .addField(newMonster.getName(), newMonster.getDescription(), false)
-                    .addField(getUserName(), ":crossed_swords: " + getCharacter().getCombatPower(), true)
+                    .addField(getUserName(), ":crossed_swords: " + getCharacter().getCombatPower() + "\n\u2800", true)
                     .addField(newMonster.getName(), ":crossed_swords: " + newMonster.getCombatPower(), true)
-                    .addField("Result", printFightResult(fight, newMonster), false);
+                    .addField(":clipboard:", printFightResult(fight, newMonster), false);
                 if (fight.getResult().equals("A wins")) {
-                    embedBuilder.addField("Loot", printLoot(randomLoot), false);
+                    int lootNumber = getCharacter().getInventory().addItems(randomLoot);
+                    embedBuilder.addField(":palm_down_hand:", printLoot(randomLoot, lootNumber), false);
                 }
-                getCharacter().getInventory().addItems(randomLoot);
+
                 sendMessage(embedBuilder.build());
             }
         } catch (InventoryFullException e){
@@ -525,19 +536,29 @@ class CallRat extends MessageProcessor{
         }
     }
     private String printFightResult(Fight fight, Monster monster){
+        StringBuilder stringBuilder = new StringBuilder();
         if (fight.getResult().equals("A wins"))
-           return (getUserName() + " wins against " + monster.getName());
+            stringBuilder.append(getUserName() + " wins against " + monster.getName());
         else if (fight.getResult().equals("B wins"))
-            return (getUserName() + " loses against the "  + monster.getName());
+            stringBuilder.append(getUserName() + " loses against the " + monster.getName());
         else
-            return (getUserName() + " ties with "  + monster.getName());
+            stringBuilder.append(getUserName() + " ties with "  + monster.getName());
+        return stringBuilder.toString();
     }
 
-    private String printLoot(ArrayList<Item> lootList){
+    private String printLoot(ArrayList<Item> lootList, int lootNumber){
         StringBuilder stringBuilder = new StringBuilder();
         Iterator<Item> itemIterator = lootList.iterator();
+        int looted = 0;
         while (itemIterator.hasNext()) {
+            if (looted < lootNumber){
+                stringBuilder.append(" :white_check_mark:");
+                looted++;
+            }
+            else
+                stringBuilder.append(" :x:");
             stringBuilder.append(itemIterator.next().getName());
+
             if (itemIterator.hasNext())
                 stringBuilder.append(", ");
         }

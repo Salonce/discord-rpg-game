@@ -48,16 +48,19 @@ public class Inventory {
             }
         }
     }
-    public void addItems(ArrayList<Item> itemsToAdd) throws InventoryFullException {
+    public int addItems(ArrayList<Item> itemsToAdd) throws InventoryFullException {
+        int number = 0;
         Iterator<Item> newItemsIterator= itemsToAdd.iterator();
         try {
             while (newItemsIterator.hasNext()) {
                 add(newItemsIterator.next());
+                number++;
             }
         }
         catch(InventoryFullException e){
-            throw new InventoryFullException("Inventory is full. Can't pick up remaining items.");
+            return number;
         }
+        return number;
     }
     public void removeItem(Item item){
         itemList.remove(item);
