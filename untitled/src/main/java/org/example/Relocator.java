@@ -1,5 +1,9 @@
 package org.example;
 
+import discord4j.common.util.Snowflake;
+
+import static org.example.MessageProcessor.getCharacterManager;
+
 class Relocator{
     public static void takeOff(Character character, String itemName) throws InventoryFullException, NoSuchItemException {
         Item item = character.getEquipment().get(itemName);
@@ -27,6 +31,12 @@ class Relocator{
         character.getInventory().remove(itemName);
         character.getInventory().addMoney(itemToSell.getValue());
         return itemToSell.getValue();
+    }
+
+    public static void give(Character character, Snowflake receiver, String itemName) throws NoSuchItemException, NoSuchCharacterException, InventoryFullException {
+        Item item = character.getInventory().get(itemName);
+        getCharacterManager().getCharacterById(receiver).getInventory().add(item);
+        character.getInventory().removeItem(item);
     }
     /// public static int give(Character character, String userId, String itemName)
 }

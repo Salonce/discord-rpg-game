@@ -83,6 +83,7 @@ class CharacterManager {
     public void createNewCharacter(Snowflake id){
         usersCharacters.put(id, new Character());
     }
+
     public Character getCharacterById(Snowflake id) throws NoSuchCharacterException {
         if (usersCharacters.get(id) == null){
             throw new NoSuchCharacterException("No such character");

@@ -66,9 +66,10 @@ abstract class MessageProcessor{
 
 
     public String getUsernameBySnowflake(Snowflake id){
-        StringBuilder stringBuilder = new StringBuilder(" ");
+        final StringBuilder stringBuilder = new StringBuilder();
         try{
-            discordClient.getUserById(id).getData().subscribe(data -> stringBuilder.append(data.username()));
+            stringBuilder.append(discordClient.getUserById(id).getData().block().username());
+            //discordClient.getUserById(id).getData().subscribe(data -> {stringBuilder.append(data.username()); System.out.println(data.username());});
             return stringBuilder.toString();
         } catch (Exception e){
             System.out.println("exception when catching user");
@@ -129,10 +130,8 @@ class CallGive extends MessageProcessor{
             if (content[0].equals(".give") && characterCheck()){
                 String itemName = content[2];
                 Snowflake secondId = Snowflake.of(content[1]);
-                Item item = getCharacter().getInventory().get(itemName);
-                getCharacterManager().getCharacterById(secondId).getInventory().add(item);
-                getCharacter().getInventory().removeItem(item);
 
+                Relocator.give(getCharacter(), secondId, itemName);
                 sendMessage(getUserName() + " gives " + itemName + " to " + getUsernameBySnowflake(secondId));
             }
         } catch (NoSuchCharacterException ex) {
@@ -240,8 +239,7 @@ class CallEquip extends MessageProcessor{
         } catch (NoSuchItemException e){
             sendMessage("You don't have this item in your inventory!");
         }
-        catch (Exception e){
-            //sendMessage("Was");
+        catch (Exception ignored){
         }
     }
 }
@@ -295,14 +293,6 @@ class CallSell extends MessageProcessor{
     }
 }
 
-class CallPing extends MessageProcessor{
-    public void process(){
-        if (getContent().equals(".ping")){
-            sendMessage("pong");
-        }
-    }
-}
-
 class CallCooldowns extends MessageProcessor{
     final static int AP_MAX_CHAR = 13;
     private String getField(){
@@ -321,10 +311,6 @@ class CallCooldowns extends MessageProcessor{
                     .color(Color.BLUE)
                     .author(getUserName() + " - action points", null, getUserAvatarUrl())
                     .addField("\u2800", getField(), false)
-                    //.addField("Recovery time: ",  String.valueOf(getCharacter().getActionPoints().AP_RECOVERY_TIME) , false)
-                    //.addField("Next AP in: ", String.valueOf(getCharacter().getActionPoints().getFirstCD()) , false)
-                    //.addField("All AP in: " , String.valueOf(getCharacter().getActionPoints().getLastCD()) , false)
-                    //.thumbnail("https://openclipart.org/image/800px/330656")
                     .build();
             sendMessage(embed);
         }
@@ -503,7 +489,6 @@ class AnswerManager {
 
     public AnswerManager() {
         messageProcessorList.add(new CallHelp());
-        messageProcessorList.add(new CallPing());
         messageProcessorList.add(new CallCreateCharacter());
         messageProcessorList.add(new CallCharTester());
         messageProcessorList.add(new CallCooldowns());
@@ -603,4 +588,11 @@ class AnswerManager {
                 .build();
             sendMessage(embed);
         }
+
+
+
+                        //Item item = getCharacter().getInventory().get(itemName);
+                //getCharacterManager().getCharacterById(secondId).getInventory().add(item);
+                //getCharacter().getInventory().removeItem(item);
         */
+
