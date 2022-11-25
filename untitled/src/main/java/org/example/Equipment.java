@@ -1,27 +1,18 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 class Equipment{
-    private Item headEquipment;
-    private Item torsoEquipment;
-    private Item legsEquipment;
-    private Item handsEquipment;
-    private Item feetEquipment;
-    private Item firstHandEquipment;
-    private Item secondHandEquipment;
+    private Item headEquipment = ManagerItem.NO_HELMET;;
+    private Item torsoEquipment = ManagerItem.NO_ARMOR;;
+    private Item legsEquipment = ManagerItem.NO_TROUSERS;;
+    private Item handsEquipment = ManagerItem.NO_GLOVES;;
+    private Item feetEquipment = ManagerItem.NO_BOOTS;;
+    private Item firstHandEquipment = ManagerItem.NO_WEAPON;;
+    private Item secondHandEquipment = ManagerItem.NO_SHIELD;;
 
-    public Equipment(){
-        this.headEquipment = ManagerItem.NO_HELMET;
-        this.torsoEquipment = ManagerItem.NO_ARMOR;
-        this.legsEquipment = ManagerItem.NO_TROUSERS;
-        this.handsEquipment = ManagerItem.NO_GLOVES;
-        this.feetEquipment = ManagerItem.NO_BOOTS;
-        this.firstHandEquipment = ManagerItem.NO_WEAPON;
-        this.secondHandEquipment = ManagerItem.NO_SHIELD;
-    }
-
-    private ArrayList<Item> getEquipmentList(){
+    private ArrayList<Item> readAsList(){
         ArrayList<Item> arrayList = new ArrayList<>();
         arrayList.add(headEquipment);
         arrayList.add(torsoEquipment);
@@ -33,33 +24,25 @@ class Equipment{
         return arrayList;
     }
 
+    public Equipment(){
+    }
+
     public int getTotalDefence(){
-        return headEquipment.getDefence()
-                +torsoEquipment.getDefence()
-                +legsEquipment.getDefence()
-                +handsEquipment.getDefence()
-                +feetEquipment.getDefence()
-                +firstHandEquipment.getDefence()
-                +secondHandEquipment.getDefence();
+        return this.readAsList().stream().collect(Collectors.summingInt(Item::getDefence));
     }
     public int getTotalAttack(){
-        return headEquipment.getAttack()
-                +torsoEquipment.getAttack()
-                +legsEquipment.getAttack()
-                +handsEquipment.getAttack()
-                +feetEquipment.getAttack()
-                +firstHandEquipment.getAttack()
-                +secondHandEquipment.getAttack();
+        return this.readAsList().stream().collect(Collectors.summingInt(Item::getAttack));
     }
     public int getTotalWeight(){
-        return headEquipment.getWeight()
-                +torsoEquipment.getWeight()
-                +legsEquipment.getWeight()
-                +handsEquipment.getWeight()
-                +feetEquipment.getWeight()
-                +firstHandEquipment.getWeight()
-                +secondHandEquipment.getWeight();
+        return this.readAsList().stream().collect(Collectors.summingInt(Item::getWeight));
     }
+
+    private void setHeadEquipment(Item item){
+        if (item.getWearable() == Wearable.HEAD)
+            headEquipment = item;
+    }
+
+
 
     public void equip(Item item) throws NotWearableItemException {
         if (item.getWearable() == Wearable.HEAD){
@@ -184,6 +167,8 @@ class Equipment{
         return item;
     }
 
+
+
     public Item getHeadEquipment() {
         return headEquipment;
     }
@@ -208,5 +193,25 @@ class Equipment{
 }
 
 
+/*
+
+        return readAsList().stream().collect(Collectors.summingInt(Item::getWeight));
+
+ */
+
+
+/*
+    private ArrayList<Item> getEquipmentList(){
+        ArrayList<Item> arrayList = new ArrayList<>();
+        arrayList.add(headEquipment);
+        arrayList.add(torsoEquipment);
+        arrayList.add(legsEquipment);
+        arrayList.add(handsEquipment);
+        arrayList.add(feetEquipment);
+        arrayList.add(firstHandEquipment);
+        arrayList.add(secondHandEquipment);
+        return arrayList;
+    }
+*/
 
 

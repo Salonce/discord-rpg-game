@@ -19,7 +19,6 @@ public class Main {
         MessageProcessor.setDiscordClient(client);
         MessageProcessor.setShops(basicShop);
 
-
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
             answerManager.process(event.getMessage());
         });

@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.Comparator;
+
 enum Wearable{
     HEAD,
     TORSO,
@@ -12,6 +14,7 @@ enum Wearable{
 }
 
 abstract class Item{
+
     //public static int MAX_ITEM_NAME_LENGTH = 15;
     public Item(String name, int weight, int value){
 
@@ -64,7 +67,6 @@ abstract class Item{
 
 
 
-
 abstract class DefensiveItem extends Item{
     public DefensiveItem(String name, int weight, int value, int defence){
         super(name, weight, value);
@@ -81,26 +83,6 @@ abstract class DefensiveItem extends Item{
     @Override
     public boolean hasDefense() {
         return true;
-    }
-}
-
-abstract class OffensiveItem extends Item{
-    public OffensiveItem(String name, int weight, int value, int attack){
-        super(name, weight, value);
-        this.attack = attack;
-    }
-    @Override
-    public boolean isMoney() {
-        return false;
-    }
-    @Override
-    public boolean hasAttack() {
-        return true;
-    }
-
-    @Override
-    public boolean hasDefense() {
-        return false;
     }
 }
 
@@ -137,6 +119,26 @@ abstract class HandsEquipment extends DefensiveItem{
 abstract class SecondHandEquipment extends DefensiveItem{
     public SecondHandEquipment(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
+    }
+}
+
+abstract class OffensiveItem extends Item{
+    public OffensiveItem(String name, int weight, int value, int attack){
+        super(name, weight, value);
+        this.attack = attack;
+    }
+    @Override
+    public boolean isMoney() {
+        return false;
+    }
+    @Override
+    public boolean hasAttack() {
+        return true;
+    }
+
+    @Override
+    public boolean hasDefense() {
+        return false;
     }
 }
 
@@ -424,3 +426,56 @@ enum WeaponType{
     //WATER
     //POISON
 }
+
+/*
+///Item builder gives more optional values to pick and make the coupling with ENUM system looser, i think
+
+enum Itemtype{
+    HELMET (false, false, true, false, Wearable.HEAD),
+    ARMOR (false, false, true, false, Wearable.TORSO),
+    TROUSERS (false, false, true, false, Wearable.LEGS),
+    BOOTS (false, false, true, false, Wearable.FEET),
+    GLOVES (false, false, true, false, Wearable.HANDS),
+    ONEHWEAPON (false, true, false, false, Wearable.FIRSTHAND),
+    SHIELD (false, false, true, false, Wearable.SECONDHAND),
+
+    NOHELMET (false, false, true, true, Wearable.HEAD),
+    NOARMOR (false, false, true, true, Wearable.TORSO),
+    NOTROUSERS (false, false, true, true, Wearable.LEGS),
+    NOBOOTS (false, false, true, true, Wearable.FEET),
+    NOGLOVES (false, false, true, true, Wearable.HANDS),
+    NOONEHWEAPON (false, true, false, true, Wearable.FIRSTHAND),
+    NOSHIELD (false, false, true, true, Wearable.SECONDHAND),
+
+    CRAFTINGITEM (false, false, false, false, Wearable.NOTHING),
+    MONEY (true, false, false, false, Wearable.NOTHING);
+
+    private final boolean isMoney;
+    private final boolean hasattack;
+    private final boolean hasdefence;
+    private final boolean isEmptyEquipment;
+    private final Wearable wearable;
+    Itemtype(boolean isMoney, boolean hasAttack, boolean hasDefense, boolean isEmptyEquipment, Wearable wearable) {
+        this.isMoney = isMoney;
+        this.hasattack = hasAttack;
+        this.hasdefence = hasDefense;
+        this.isEmptyEquipment = isEmptyEquipment;
+        this.wearable = wearable;
+    }
+}
+ */
+
+
+
+
+/*
+
+    //TESTING
+    static Comparator<Item> getComparatorByName(){
+        return Comparator.comparing(Item::getName);
+    }
+    static Comparator<Item> getComparatorByValue(){
+        return Comparator.<Item, Integer>comparing(item -> item.getValue());
+    }
+    //END OF TESTING
+ */

@@ -1,8 +1,7 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Inventory {
@@ -57,7 +56,13 @@ public class Inventory {
         }
     }
     public int addItems(ArrayList<Item> itemsToAdd) throws InventoryFullException {
+        //int numberToAdd = MAX_ITEM_NUMBER - itemList.size();
+        //if (itemsToAdd.size() < numberToAdd){
+        //    numberToAdd = itemsToAdd.size();
+        //}
+
         int number = 0;
+
         Iterator<Item> newItemsIterator= itemsToAdd.iterator();
         try {
             while (newItemsIterator.hasNext()) {
@@ -70,50 +75,47 @@ public class Inventory {
         }
         return number;
     }
+
+    public Item get(String name) throws NoSuchItemException {
+        try {
+            return itemList.stream().filter(item -> item.getName().equalsIgnoreCase(name)).findAny().get();
+        } catch (NoSuchElementException e){
+            throw new NoSuchItemException();
+        }
+    }
+    public int getItemsWeight(){return itemList.stream().map(Item::getWeight).collect(Collectors.summingInt(Integer::intValue));}
+    public int getItemsValue(){return itemList.stream().map(Item::getValue).collect(Collectors.summingInt(Integer::intValue));}
+    public void remove(String name) throws NoSuchItemException {itemList.remove(get(name));}
     public void removeItem(Item item){
         itemList.remove(item);
     }
+    public void sortByName(){
+        itemList.sort(Comparator.comparing(Item::getName));
+    }
+    public void sortByValue(){
+        itemList.sort(Comparator.comparing(Item::getValue));
+    }
+    public void sortByValueReversed(){
+        itemList.sort(Comparator.comparing(Item::getValue).reversed());
+    }
+    public void swap(int a, int b) throws IndexOutOfBoundsException { Collections.swap(itemList, a, b);}
+}
 
 
-    public int getItemsWeight(){
+
+
+        /*for(int i = 0; i < itemList.size(); i++){
+            if (itemList.get(i).getName().equalsIgnoreCase(name)){
+                itemList.remove(i);
+                return;
+            }
+        }
+        throw new NoSuchItemException();
+         */
+        /*
         int weight = 0;
         for (Item item : itemList){
             weight += item.getWeight();
         }
         return weight;
-    }
-    public int getItemsValue(){
-        int value = 0;
-        for (Item item : itemList){
-            value += item.getValue();
-        }
-        return value;
-    }
-
-    public Item get(String name) throws NoSuchItemException {
-        int i = 0;
-        while(i < itemList.size()){
-            if (itemList.get(i).getName().equalsIgnoreCase(name)){
-                return itemList.get(i);
-            }
-            else{
-                i++;
-            }
-        }
-        throw new NoSuchItemException();
-    }
-
-    public void remove(String name) throws NoSuchItemException {
-        int i = 0;
-        while(i < itemList.size()){
-            if (itemList.get(i).getName().equalsIgnoreCase(name)){
-                itemList.remove(i);
-                return;
-            }
-            else{
-                i++;
-            }
-        }
-        throw new NoSuchItemException();
-    }
-}
+         */

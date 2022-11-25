@@ -11,7 +11,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import java.util.NoSuchElementException;
 
 abstract class MessageProcessor{
-    public static void setMessage(Message message) throws InvalidUserException {
+    public static void setMessage(Message message) {
         try {
             MessageProcessor.id = message.getAuthor().get().getId();
             MessageProcessor.content = message.getContent();
@@ -22,7 +22,7 @@ abstract class MessageProcessor{
             MessageProcessor.character = characterManager.getCharacterById(id);
         }
         catch(NoSuchElementException noSuchElementException){
-            throw new InvalidUserException("Invalid message Author");
+           ///
         } catch (NoSuchCharacterException noSuchCharacterException) {
             MessageProcessor.character = null;
         }
@@ -236,7 +236,7 @@ class CallEquip extends MessageProcessor{
                 Relocator.equip(getCharacter(), content[1]);
                 sendMessage(getUserName() + " equipped " + content[1]);
             }
-        } catch (NoSuchItemException e){
+        } catch (NoSuchElementException e){
             sendMessage("You don't have this item in your inventory!");
         }
         catch (Exception ignored){
@@ -255,7 +255,7 @@ class CallUnequip extends MessageProcessor{
             }
         }
         catch (IndexOutOfBoundsException e){
-        } catch (NoSuchItemException e){
+        } catch (NoSuchElementException e){
             sendMessage("You don't wear that item!");
         } catch (Exception e){}
     }
@@ -270,7 +270,7 @@ class CallDrop extends MessageProcessor{
                 Relocator.drop(getCharacter(), content[1]);
                 sendMessage(getUserName() + " dropped " + content[1]);
             }
-        } catch (NoSuchItemException e){
+        } catch (NoSuchElementException e){
             sendMessage("You don't have that item in your inventory!");
         } catch (Exception e){
         }
@@ -286,7 +286,7 @@ class CallSell extends MessageProcessor{
                 int cash = Relocator.sell(getCharacter(), content[1]);
                 sendMessage(getUserName() + " sold " + content[1] + " for " + cash);
             }
-        } catch (NoSuchItemException e){
+        } catch (NoSuchElementException e){
             sendMessage("You don't have this item!");
         }
         catch (Exception e){}
@@ -316,6 +316,7 @@ class CallCooldowns extends MessageProcessor{
         }
     }
 }
+
 
 class CallShop extends MessageProcessor{
     public void process(){
@@ -364,7 +365,6 @@ class CallI extends MessageProcessor{
         }
         return stringBuilder.toString();
     }
-
 }
 
 class CallEquipmentInfo extends MessageProcessor{
@@ -484,6 +484,50 @@ class CallRat extends MessageProcessor{
     }
 }
 
+////NEW SORTING
+class CallSortByName extends MessageProcessor{
+    public void process(){
+        if (getContent().equals(".sortname") && characterCheck()){
+            getCharacter().getInventory().sortByName();
+            sendMessage("Inventory sorted by name.");
+        }
+    }
+}
+
+class CallSortByValue extends MessageProcessor{
+    public void process(){
+        if (getContent().equals(".sortval") && characterCheck()){
+            getCharacter().getInventory().sortByValueReversed();
+            sendMessage("Inventory sorted by value.");
+        }
+    }
+}
+
+class CallSwap extends MessageProcessor{
+    public void process(){
+        try{
+            String[] content = getContent().split(" ", 3);
+            if (content[0].equalsIgnoreCase(".swap") && characterCheck()){
+                int one = Integer.parseInt(content[1]);
+                int two = Integer.parseInt(content[2]);
+                getCharacter().getInventory().swap(one-1, two-1);
+                sendMessage("Inventory: *" + getCharacter().getInventory().getItemList().get(two-1).getName() + "* and *" + getCharacter().getInventory().getItemList().get(one-1).getName() + "* have been swapped.");
+
+            }
+        } catch (NumberFormatException  e){
+            sendMessage("Wrong number!");
+        } catch (ArrayIndexOutOfBoundsException e){
+            sendMessage("You don't have these items.");
+        } catch (IndexOutOfBoundsException e){
+            sendMessage("You don't have these items.");
+        }
+        catch (Exception e){}
+    }
+
+
+}
+////NEW SORTING
+
 class AnswerManager {
     private ArrayList<MessageProcessor> messageProcessorList = new ArrayList<>();
 
@@ -502,30 +546,23 @@ class AnswerManager {
         messageProcessorList.add(new CallSell());
         messageProcessorList.add(new CallGive());
         messageProcessorList.add(new CallRat());
+
+        messageProcessorList.add(new CallSwap());
+        messageProcessorList.add(new CallSortByName());
+        messageProcessorList.add(new CallSortByValue());
     }
 
     private boolean selfSending(Message message) {
         try {
-            if (message.getAuthor().get().getId().asString().equals("772821811707904022")) {
-                return true;
-            }
-            return false;
+            return (message.getAuthor().get().getId().asString().equals("772821811707904022"));
         } catch (NoSuchElementException e) {
             return false;
         }
     }
     public void process(Message message) {
-        try{
-            if (!selfSending(message)) {
-                MessageProcessor.setMessage(message);
-                Iterator<MessageProcessor> messageProcessingMachine = messageProcessorList.iterator();
-                while (messageProcessingMachine.hasNext()) {
-                    //System.out.println("executing...");
-                    messageProcessingMachine.next().process();
-                }
-            }
-        }
-        catch(InvalidUserException e){
+        if (!selfSending(message)) {
+            MessageProcessor.setMessage(message);
+            messageProcessorList.forEach(MessageProcessor::process);
         }
     }
 }

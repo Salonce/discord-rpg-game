@@ -25,8 +25,8 @@ class NoSuchItemException extends Exception{
 }
 
 class NoSuchCharacterException extends Exception{
-    public NoSuchCharacterException(String message){
-        super(message);
+    public NoSuchCharacterException(){
+        super();
     }
 }
 
