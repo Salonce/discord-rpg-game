@@ -34,7 +34,7 @@ class ManagerItem {
     //WEAPONS
     public final static Item KNIFE = new Weapon("Knife", 1, 15, 1, 3);
     public final static Item GABRIELAS_NAIL = new Weapon("Gabriela's nail", 1, 35, 2, 4);
-
+    public final static Item PIGEON_MUSCLE = new Weapon("Pigeon's muscle", 1, 15, 1, 5);
 
     //DOLPHIN SET
     public final static Item DOLPHIN_SHIELD = new Shield("Dolphin shield", 3, 155, 16);
@@ -67,5 +67,6 @@ class ManagerItem {
     public final static Item FINGERHOODS_STORY = new CraftingItem("Fingerhood's story", 100, 0);
 
     public final static Item FEATHER = new CraftingItem("Feather", 0, 1);
+
 
 }

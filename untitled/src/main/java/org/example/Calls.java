@@ -457,6 +457,7 @@ class CallRat extends MessageProcessor{
             stringBuilder.append(getUserName() + " dies.");
             stringBuilder.append("\n" + monster.getName() + " has :hearts:" + fight.getResults().getResultB().getHealth() + " left.");
         }
+        getCharacter().getHealth().set(fight.getResults().getResultA().getHealth());
         return stringBuilder.toString();
     }
 
@@ -518,6 +519,15 @@ class CallSortByValue extends MessageProcessor{
     }
 }
 
+class CallHospital extends MessageProcessor{
+    public void process(){
+        if (getContent().equals(".hospital") && characterCheck()){
+            getCharacter().getHealth().set(getCharacter().getHealth().getMax());
+            sendMessage("You are healed.");
+        }
+    }
+}
+
 class CallSwap extends MessageProcessor{
     public void process(){
         try{
@@ -562,6 +572,7 @@ class AnswerManager {
         messageProcessorList.add(new CallGive());
         messageProcessorList.add(new CallRat());
 
+        messageProcessorList.add(new CallHospital());
         messageProcessorList.add(new CallSwap());
         messageProcessorList.add(new CallSortByName());
         messageProcessorList.add(new CallSortByValue());

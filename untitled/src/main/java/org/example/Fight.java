@@ -83,16 +83,6 @@ public class Fight {
 
     private int powerA;
     private int powerB;
-
-    String getResult(){
-        if (powerA > powerB)
-            return "A wins";
-        else if (powerA < powerB)
-            return "B wins";
-        return "tie";
-    }
-
-
 }
 
 class Results{
@@ -101,8 +91,6 @@ class Results{
         this.combatStrengthB = combatStrengthB;
         this.totalPowerA = calculateRandomTotalPower(combatStrengthA);
         this.totalPowerB = calculateRandomTotalPower(combatStrengthB);
-        this.resultA = new Result();
-        this.resultB = new Result();
 
         this.setResults(totalPowerA, totalPowerB);
     }
@@ -121,86 +109,75 @@ class Results{
     private Result resultA;
     private Result resultB;
 
-
-
     private int calculateRandomTotalPower(CombatStrength combatStrength){
         int minTotalPower = combatStrength.getHealth() * combatStrength.getMinAttack() * (combatStrength.getDefense() + combatStrength.getSpeed());
         int maxTotalPower = combatStrength.getHealth() * combatStrength.getMaxAttack() * (combatStrength.getDefense() + combatStrength.getSpeed());
-        Random random = new Random();
         int randomTotalPower = minTotalPower;
         if (maxTotalPower > minTotalPower)
-            randomTotalPower += random.nextInt(maxTotalPower-minTotalPower);
+            randomTotalPower += new Random().nextInt(maxTotalPower-minTotalPower);
         return randomTotalPower;
     }
 
     private void setResults (int totalPowerA, int totalPowerB){
         if (totalPowerA > totalPowerB){
             double newHealth = (double) combatStrengthA.getHealth() - ((( (double) totalPowerB) / (double) totalPowerA) * (double) combatStrengthA.getHealth());
-            System.out.println("totalPowerB: " + totalPowerB);
-            System.out.println("totalPowerA: " + totalPowerA);
-            System.out.println("A health: " + combatStrengthA.getHealth());
-            System.out.println("A new health: " + newHealth);
-            if (newHealth <= 0)
+            if (newHealth < 1)
                 newHealth = 1;
-            resultA.setHealth((int) Math.round(newHealth));
-            resultA.setVictory(true);
-            resultB.setHealth(0);
-            resultB.setVictory(false);
+            resultA = new Result((int) Math.round(newHealth), true);
+            resultB = new Result(0, false);
         }
         else if (totalPowerB > totalPowerA){
             double newHealth = (double) combatStrengthB.getHealth() - ((((double) totalPowerA)/totalPowerB) * combatStrengthB.getHealth());
-            System.out.println("totalPowerA: " + totalPowerA);
-            System.out.println("totalPowerB: " + totalPowerB);
-            System.out.println("B health: " + combatStrengthB.getHealth());
-            System.out.println("B new health: " + newHealth);
-            if (newHealth <= 0)
+            if (newHealth < 1)
                 newHealth = 1;
-            resultB.setHealth((int) Math.round(newHealth));
-            resultB.setVictory(true);
-            resultA.setHealth(0);
-            resultA.setVictory(false);
+            resultB = new Result((int) Math.round(newHealth), true);
+            resultA = new Result(0, false);
         }
         else if (totalPowerA == totalPowerB){
-            Random random = new Random();
-            int OneOrTwo = random.nextInt(2);
+            int OneOrTwo = new Random().nextInt(2);
             if (OneOrTwo == 0) {
-                resultA.setHealth(1);
-                resultA.setVictory(true);
-                resultB.setHealth(0);
-                resultB.setVictory(false);
+                resultA = new Result(1, true);
+                resultB = new Result(0, false);
             }
             else{
-                resultA.setHealth(0);
-                resultA.setVictory(false);
-                resultB.setHealth(1);
-                resultB.setVictory(true);
+                resultA = new Result(0, false);
+                resultB = new Result(1, true);
             }
         }
     }
-
 }
 
 class Result{
+    Result(int health, boolean victory){
+        this.health = health;
+        this.victory = victory;
+    }
     private int health;
-    private boolean victory;
-
     public int getHealth() {
         return health;
     }
+
+    private boolean victory;
     public boolean isVictory() {
         return victory;
     }
-
-    public void setHealth(int health) {
-        this.health = health;
-    }
-
-    public void setVictory(boolean victory) {
-        this.victory = victory;
-    }
-
 }
 
+
+
+
+/*
+System.out.println("totalPowerB: " + totalPowerB);
+System.out.println("totalPowerA: " + totalPowerA);
+System.out.println("A health: " + combatStrengthA.getHealth());
+System.out.println("A new health: " + newHealth);
+ */
+            /*
+System.out.println("totalPowerA: " + totalPowerA);
+System.out.println("totalPowerB: " + totalPowerB);
+System.out.println("B health: " + combatStrengthB.getHealth());
+System.out.println("B new health: " + newHealth);
+ */
 
 //weather_type //environment conditions
 

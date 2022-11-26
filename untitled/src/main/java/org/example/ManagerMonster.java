@@ -21,6 +21,12 @@ class ManagerMonster {
             .addDescription("Talking admin. Always has a story to tell.")
             .build();
 
+    public static final Monster PIGEON = new Monster
+            .MonsterBuilder("Pigeon", 50, 120, 2, 3,5, 5)
+            .addLoot(ManagerItem.PIGEON_MUSCLE, 70)
+            .addDescription("A ripped half-korean, but doesn't have any weapon.")
+            .build();
+
     public static final Monster SQUIRREL = new Monster
             .MonsterBuilder("Squirrel", 5, 20, 1, 4,2, 13)
             .addDescription("Jumps on the trees. Eats (it's) nuts.")

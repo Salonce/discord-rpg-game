@@ -28,9 +28,11 @@ class ManagerDungeon {
 
 
     public static final Dungeon SERVER = new Dungeon.DungeonBuilder()
-            .addMonster(ManagerMonster.FINGERHOOD, 50)
-            .addMonster(ManagerMonster.GABRIELA, 50)
+            .addMonster(ManagerMonster.FINGERHOOD, 30)
+            .addMonster(ManagerMonster.GABRIELA, 30)
+            .addMonster(ManagerMonster.PIGEON, 30)
             .build();
+
 
     public static final Dungeon CHESTPLACE = new Dungeon.DungeonBuilder().addMonster(ManagerMonster.CHEST, 100).build();
 

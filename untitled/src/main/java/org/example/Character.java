@@ -25,15 +25,15 @@ class Character implements Fighter{
     public ActionPoints getActionPoints() {return actionPoints;}
 
     public CombatStrength getCombatStrength(){
-        return new CombatStrength(stats.getHealth(), equipment.getTotalMinAttack(), equipment.getTotalMaxAttack(), equipment.getTotalDefence(), stats.getSpeed());
+        return new CombatStrength(stats.getHealth().get(), equipment.getTotalMinAttack(), equipment.getTotalMaxAttack(), equipment.getTotalDefence(), stats.getSpeed());
     }
 
 
     @Override
     public int getCombatPower() {
-        return stats.getHealth() * equipment.getTotalMinAttack() * equipment.getTotalDefence();
+        return stats.getHealth().get() * equipment.getTotalMinAttack() * equipment.getTotalDefence();
     }
-    public int getHealth(){
+    public Health getHealth(){
         return stats.getHealth();
     }
 
@@ -52,13 +52,13 @@ class Character implements Fighter{
 
 class Stats{
     public Stats(){
-        this.health = 100;
         this.speed = 1;
+        this.health = new Health();
     }
 
     //attributes
     private int speed;
-    private int health;
+    private Health health;
 
     public int getSpeed() {
         return speed;
@@ -68,13 +68,29 @@ class Stats{
         this.speed = speed;
     }
 
-    public int getHealth(){
+    public Health getHealth(){
         return this.health;
     }
-    public void setHealth(int health) {
-        this.health = health;
+
+}
+
+class Health{
+    private final int maxHealth = 100;
+
+    public Health(){
+        this.health = 100;
     }
 
+    public int getMax() {
+        return maxHealth;
+    }
+    private int health;
+    public int get(){
+        return this.health;
+    }
+    public void set(int health) {
+        this.health = health;
+    }
 }
 
 class CharacterManager {
