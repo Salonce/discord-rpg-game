@@ -1,9 +1,8 @@
 package org.example;
 
-
 import discord4j.common.util.Snowflake;
-
 import java.util.HashMap;
+
 
 class Character implements Fighter{
     public Character(){
@@ -25,16 +24,19 @@ class Character implements Fighter{
     private ActionPoints actionPoints;
     public ActionPoints getActionPoints() {return actionPoints;}
 
+    public CombatStrength getCombatStrength(){
+        return new CombatStrength(stats.getHealth(), equipment.getTotalMinAttack(), equipment.getTotalMaxAttack(), equipment.getTotalDefence(), stats.getSpeed());
+    }
+
+
     @Override
     public int getCombatPower() {
-        System.out.println("HP: " + stats.getHealth());
-        System.out.println("str: " + stats.getStrength());
-        System.out.println("total att: " + equipment.getTotalAttack());
-        System.out.println("total def: " + equipment.getTotalDefence());
-
-        return stats.getHealth() * stats.getStrength() * equipment.getTotalAttack() * equipment.getTotalDefence();
-
+        return stats.getHealth() * equipment.getTotalMinAttack() * equipment.getTotalDefence();
     }
+    public int getHealth(){
+        return stats.getHealth();
+    }
+
 
     @Override
     public Properties getProperties() {
@@ -50,29 +52,29 @@ class Character implements Fighter{
 
 class Stats{
     public Stats(){
-        this.health = 1;
-        this.strength = 1;
+        this.health = 100;
+        this.speed = 1;
     }
 
     //attributes
+    private int speed;
     private int health;
-    private int strength;
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
 
     public int getHealth(){
         return this.health;
     }
-
     public void setHealth(int health) {
         this.health = health;
     }
 
-    public int getStrength() {
-        return strength;
-    }
-
-    public void setStrength(int strength) {
-        this.strength = strength;
-    }
 }
 
 class CharacterManager {
@@ -91,6 +93,8 @@ class CharacterManager {
         else throw new NoSuchCharacterException();
     }
 }
+
+
 
 /*
 class Skills{

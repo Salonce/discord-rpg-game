@@ -1,53 +1,54 @@
 package org.example;
 
 class ManagerMonster {
-    public static final Monster RAT = new Monster
-            .MonsterBuilder("Rat", 15)
+    public static final Monster ENORMOUS_RAT = new Monster
+            .MonsterBuilder("Enormous rat", 15, 30, 2, 3, 1, 1)
             .addLoot(ManagerItem.RAT_MEAT, 70)
             .addLoot(ManagerItem.RAT_TAIL, 30)
-            .addDescription("Little, annoying mammal. Likes to live near people and steal their food.")
+            .addDescription("This rat is really huge. And smart. Likes to live near people and steal their food.")
             .build();
 
     public static final Monster GABRIELA = new Monster
-            .MonsterBuilder("Gabriela", 1)
+            .MonsterBuilder("Gabriela", 1, 100, 2, 4,4, 3)
             .addLoot(ManagerItem.GABRIELAS_TONGUE, 40)
-            .addDescription("Proud resident of Brazil")
+            .addLoot(ManagerItem.GABRIELAS_NAIL, 50)
+            .addDescription("Wild brazilian woman. Her sharp nails can cut right through your skin.")
             .build();
 
     public static final Monster FINGERHOOD = new Monster
-            .MonsterBuilder("Fingerhood", 50)
+            .MonsterBuilder("Fingerhood", 50, 100, 1, 2,1, 1)
             .addLoot(ManagerItem.FINGERHOODS_STORY, 100)
-            .addDescription("Talking admin")
+            .addDescription("Talking admin. Always has a story to tell.")
             .build();
 
     public static final Monster SQUIRREL = new Monster
-            .MonsterBuilder("Squirrel", 5)
+            .MonsterBuilder("Squirrel", 5, 20, 1, 4,2, 13)
             .addDescription("Jumps on the trees. Eats (it's) nuts.")
             .build();
 
     public static final Monster BUTTERFLY = new Monster
-            .MonsterBuilder("Butterfly", 1)
+            .MonsterBuilder("Butterfly", 1, 3, 1, 1,1, 100)
             .addLoot(ManagerItem.BUTTERFLY_WING, 60)
             .addDescription("Flying little thing. Pretty and comes in various colours.")
             .build();
 
     public static final Monster WOLF = new Monster
-            .MonsterBuilder("Wolf", 50)
+            .MonsterBuilder("Wolf", 50, 70, 5, 7,6, 10)
             .addDescription("An angry, dog-like beast from the forest. Likes to move in packs.")
             .build();
 
     public static final Monster BEAR = new Monster
-            .MonsterBuilder("Bear", 500)
+            .MonsterBuilder("Bear", 500, 200, 8, 13, 25, 5)
             .addLoot(ManagerItem.BEAR_MEAT, 70)
             .addLoot(ManagerItem.BEAR_SKIN, 30)
             .addDescription("A wild mammal with a large body and deadly claws.")
             .build();
 
-    public static final Monster DRAGON = new Monster.MonsterBuilder("Dragon", 5000).addDescription("Immense monster covered in thick leather and scales that breathes fire.").build();
+    public static final Monster DRAGON = new Monster.MonsterBuilder("Dragon", 5000, 960, 47, 64,70, 53).addDescription("Immense monster covered in thick leather and scales that breathes fire.").build();
 
-    public static final Monster DOLPHIN = new Monster.MonsterBuilder("Dolphin", 200).addDescription("Swimmer.").build();
+    public static final Monster DOLPHIN = new Monster.MonsterBuilder("Dolphin", 200, 10, 1, 2,1, 1).addDescription("Swimmer.").build();
 
-    public static final Monster CHEST = new Monster.MonsterBuilder("Chest", 0).addDescription("Receptacle with treasuries.")
+    public static final Monster CHEST = new Monster.MonsterBuilder("Chest", 0, 1, 1, 1,1, 1).addDescription("Receptacle with treasuries.")
             .addLoot(ManagerItem.STEEL_SWORD, 60)
             .addLoot(ManagerItem.STEEL_HELMET, 20)
             .addLoot(ManagerItem.DOLPHIN_SHIELD, 60)
@@ -56,21 +57,21 @@ class ManagerMonster {
             .addLoot(ManagerItem.SHEEP_WOOL, 25)
             .build();
 
-    public static final Monster CHICK = new Monster.MonsterBuilder("Chick", 1).addDescription("A small chicken that came right out of an egg.")
+    public static final Monster CHICK = new Monster.MonsterBuilder("Chick", 1, 20, 1, 3,1, 4).addDescription("A small chicken that came right out of an egg.")
             .addLoot(ManagerItem.STEEL_SWORD, 10)
             .addLoot(ManagerItem.FEATHER, 80)
             .build();
 
-    public static final Monster SMALL_ROOSTER = new Monster.MonsterBuilder("Small rooster", 2).addDescription("Small cock, a chicken defender.")
+    public static final Monster SMALL_ROOSTER = new Monster.MonsterBuilder("Small rooster", 2, 30, 1, 5,1, 6).addDescription("Small cock, a chicken defender.")
             .addLoot(ManagerItem.STEEL_SWORD, 10)
             .addLoot(ManagerItem.FEATHER, 80)
             .build();
 
-    public static final Monster EGG_MONSTER = new Monster.MonsterBuilder("Eggster", 3).addDescription("Strange creature made of eggs. It smells badly.")
+    public static final Monster EGG_MONSTER = new Monster.MonsterBuilder("Eggster", 3, 40, 2, 5, 2,7).addDescription("Strange creature made of eggs. It smells badly.")
             .addLoot(ManagerItem.STEEL_SWORD, 10)
             .build();
 
-    public static final Monster CHICK_LORD = new Monster.MonsterBuilder("Chick lord", 5).addDescription("Lord among chicks. Has a sharp yellow beak.")
+    public static final Monster CHICK_LORD = new Monster.MonsterBuilder("Chick lord", 5, 50, 3, 5,3, 7).addDescription("Lord among chicks. Has a sharp yellow beak.")
             .addLoot(ManagerItem.STEEL_SWORD, 10)
             .addLoot(ManagerItem.FEATHER, 80)
             .build();

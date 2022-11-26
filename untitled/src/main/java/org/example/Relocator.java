@@ -5,11 +5,11 @@ import discord4j.common.util.Snowflake;
 import static org.example.MessageProcessor.getCharacterManager;
 
 class Relocator{
-    public static void takeOff(Character character, String itemName) throws InventoryFullException, NoSuchItemException {
+    public static void takeOff(Character character, String itemName) throws InventoryFullException {
         Item item = character.getEquipment().get(itemName);
         if (item.isEquipment()) {
-            character.getEquipment().remove(itemName);
             character.getInventory().add(item);
+            character.getEquipment().remove(itemName);
         }
     }
 

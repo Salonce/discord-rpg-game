@@ -24,24 +24,12 @@ class Equipment{
         return arrayList;
     }
 
-    public Equipment(){
-    }
-
-    public int getTotalDefence(){
-        return this.readAsList().stream().collect(Collectors.summingInt(Item::getDefence));
-    }
-    public int getTotalAttack(){
-        return this.readAsList().stream().collect(Collectors.summingInt(Item::getAttack));
-    }
+    public int getTotalDefence(){ return this.readAsList().stream().collect(Collectors.summingInt(Item::getDefence)); }
+    public int getTotalMinAttack(){ return this.readAsList().stream().collect(Collectors.summingInt(Item::getMinAttack)); }
+    public int getTotalMaxAttack(){ return this.readAsList().stream().collect(Collectors.summingInt(Item::getMaxAttack)); }
     public int getTotalWeight(){
         return this.readAsList().stream().collect(Collectors.summingInt(Item::getWeight));
     }
-
-    private void setHeadEquipment(Item item){
-        if (item.getWearable() == Wearable.HEAD)
-            headEquipment = item;
-    }
-
 
 
     public void equip(Item item) throws NotWearableItemException {
@@ -70,40 +58,26 @@ class Equipment{
             throw new NotWearableItemException();
     }
 
-    public Item get(String name) throws NoSuchItemException {
+    public Item get(String name){
         if (headEquipment.getName().equalsIgnoreCase(name)){
-            if (headEquipment == null)
-                throw new NoSuchItemException();
             return headEquipment;
         }
         else if (torsoEquipment.getName().equalsIgnoreCase(name)){
-            if (torsoEquipment == null)
-                throw new NoSuchItemException();
             return torsoEquipment;
         }
         else if (legsEquipment.getName().equalsIgnoreCase(name)){
-            if (legsEquipment == null)
-                throw new NoSuchItemException();
             return legsEquipment;
         }
         else if (handsEquipment.getName().equalsIgnoreCase(name)){
-            if (handsEquipment == null)
-                throw new NoSuchItemException();
             return handsEquipment;
         }
         else if (feetEquipment.getName().equalsIgnoreCase(name)){
-            if (feetEquipment == null)
-                throw new NoSuchItemException();
             return feetEquipment;
         }
         else if (firstHandEquipment.getName().equalsIgnoreCase(name)){
-            if (firstHandEquipment == null)
-                throw new NoSuchItemException();
             return firstHandEquipment;
         }
         else if (secondHandEquipment.getName().equalsIgnoreCase(name)){
-            if (secondHandEquipment == null)
-                throw new NoSuchItemException();
             return secondHandEquipment;
         }
         else return null;
@@ -164,6 +138,8 @@ class Equipment{
             item = secondHandEquipment;
                 this.secondHandEquipment = ManagerItem.NO_SHIELD;
         }
+        if (!item.isEquipment())
+            return null;
         return item;
     }
 

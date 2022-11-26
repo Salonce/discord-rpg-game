@@ -160,6 +160,7 @@ class CallCharTester extends MessageProcessor{
                  getCharacterManager().getCharacterById(getId()).getInventory().add(ManagerItem.STEEL_ARMOR);
                  getCharacterManager().getCharacterById(getId()).getInventory().add(ManagerItem.STEEL_SWORD);
 
+
                  sendMessage("Character created!");
             }
         } catch(Exception e){
@@ -351,7 +352,7 @@ class CallI extends MessageProcessor{
         //stringBuilder.append("\n:scales: " + item.getWeight());
         stringBuilder.append("\n\u2800");
         if (item.hasAttack())
-            stringBuilder.append("\n:axe: " + item.getAttack());
+            stringBuilder.append("\n:dagger: " + item.getMinAttack() + "-" + item.getMaxAttack());
         else
             empty++;
         if (item.hasDefense()){
@@ -379,7 +380,7 @@ class CallEquipmentInfo extends MessageProcessor{
                 .addField(addSpaces("Hands", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getHandsEquipment()), true)
                 .addField(addSpaces("1st hand", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getFirstHandEquipment()), true)
                 .addField(addSpaces("2nd hand", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getSecondHandEquipment()), true)
-                .addField("Total", ":shield: " + getCharacter().getEquipment().getTotalDefence() + "\n:axe: " + getCharacter().getEquipment().getTotalAttack() + "\n:scales: " + getCharacter().getEquipment().getTotalWeight(), true)
+                .addField("Total", ":shield: " + getCharacter().getEquipment().getTotalDefence() + "\n:dagger: " + getCharacter().getEquipment().getTotalMinAttack() + "-" + getCharacter().getEquipment().getTotalMaxAttack() + "\n:scales: " + getCharacter().getEquipment().getTotalWeight(), true)
                 .author(getUserName() + " - Equipment", null, getUserAvatarUrl())
                 .timestamp(Instant.now())
                 .build();
@@ -393,7 +394,7 @@ class CallEquipmentInfo extends MessageProcessor{
         //stringBuilder.append("\n:coin: " + item.getValue());
         stringBuilder.append("\n:scales: " + item.getWeight());
         if (item.hasAttack()){
-            stringBuilder.append("\n:axe: " + item.getAttack());
+            stringBuilder.append("\n:dagger: " + item.getMinAttack() + "-" + item.getMaxAttack());
         }
         if (item.hasDefense()){
             stringBuilder.append("\n:shield: " + item.getDefence());
@@ -401,7 +402,8 @@ class CallEquipmentInfo extends MessageProcessor{
         return stringBuilder.toString();
     }
 }
-
+//":crossed_swords: " + getCharacter().getCombatPower()
+//":crossed_swords: " + newMonster.getCombatPower()
 class CallRat extends MessageProcessor{
     private final static int AP_FOR_QUEST = 1;
     public void process(){
@@ -416,10 +418,21 @@ class CallRat extends MessageProcessor{
                     .color(Color.BLUE)
                     .author(getUserName() + " uses " + AP_FOR_QUEST + " action points", null, getUserAvatarUrl())
                     .addField(newMonster.getName(), newMonster.getDescription(), false)
-                    .addField(getUserName(), ":crossed_swords: " + getCharacter().getCombatPower() + "\n\u2800", true)
-                    .addField(newMonster.getName(), ":crossed_swords: " + newMonster.getCombatPower(), true)
+                    .addField(getUserName(),
+                            "\n:hearts: " + getCharacter().getCombatStrength().getHealth()
+                            + "\n:dagger: " + getCharacter().getCombatStrength().getMinAttack() + "-" + getCharacter().getCombatStrength().getMaxAttack()
+                            + "\n:shield: " + getCharacter().getCombatStrength().getDefense()
+                            + "\n:athletic_shoe: " + getCharacter().getCombatStrength().getSpeed()
+                            + "\n\u2800", true)
+                    .addField(newMonster.getName(),
+
+                             "\n:hearts: " + newMonster.getCombatStrength().getHealth()
+                            + "\n:dagger: " + newMonster.getCombatStrength().getMinAttack() + "-" + newMonster.getCombatStrength().getMaxAttack()
+                            + "\n:shield: " + newMonster.getCombatStrength().getDefense()
+                            + "\n:athletic_shoe: " + newMonster.getCombatStrength().getSpeed()
+                            , true)
                     .addField(":clipboard:", printFightResult(fight, newMonster), false);
-                if (fight.getResult().equals("A wins")) {
+                if (fight.getResults().getResultA().isVictory()) {
                     int lootNumber = getCharacter().getInventory().addItems(randomLoot);
                     embedBuilder.addField(":palm_down_hand:", printLoot(randomLoot, lootNumber), false);
                 }
@@ -436,12 +449,14 @@ class CallRat extends MessageProcessor{
     }
     private String printFightResult(Fight fight, Monster monster){
         StringBuilder stringBuilder = new StringBuilder();
-        if (fight.getResult().equals("A wins"))
-            stringBuilder.append(getUserName() + " wins against " + monster.getName());
-        else if (fight.getResult().equals("B wins"))
-            stringBuilder.append(getUserName() + " loses against the " + monster.getName());
-        else
-            stringBuilder.append(getUserName() + " ties with "  + monster.getName());
+        if (fight.getResults().getResultA().isVictory()){
+            stringBuilder.append(monster.getName() + " dies.");
+            stringBuilder.append("\n" + getUserName() + " has :hearts:" + fight.getResults().getResultA().getHealth() + " left.");
+            }
+        else {
+            stringBuilder.append(getUserName() + " dies.");
+            stringBuilder.append("\n" + monster.getName() + " has :hearts:" + fight.getResults().getResultB().getHealth() + " left.");
+        }
         return stringBuilder.toString();
     }
 

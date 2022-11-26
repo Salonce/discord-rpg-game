@@ -21,6 +21,9 @@ abstract class Item{
         this.name = name;
         this.weight = weight;
         this.value = value;
+        this.defence = 0;
+        this.minAttack = 0;
+        this.maxAttack = 0;
     }
     private final int PRICE_MULTIPLICATOR = 2;
 
@@ -28,7 +31,8 @@ abstract class Item{
     protected int weight;
     protected int value;
     protected int defence;
-    protected int attack;
+    protected int minAttack;
+    protected int maxAttack;
     //private int price;
 
     protected String getName(){return name;}
@@ -41,9 +45,14 @@ abstract class Item{
             return defence;
         else return 0;
     }
-    public int getAttack(){
+    public int getMinAttack(){
         if (hasAttack())
-            return attack;
+            return minAttack;
+        else return 0;
+    }
+    public int getMaxAttack(){
+        if (hasAttack())
+            return maxAttack;
         else return 0;
     }
 
@@ -123,9 +132,10 @@ abstract class SecondHandEquipment extends DefensiveItem{
 }
 
 abstract class OffensiveItem extends Item{
-    public OffensiveItem(String name, int weight, int value, int attack){
+    public OffensiveItem(String name, int weight, int value, int minAttack, int maxAttack){
         super(name, weight, value);
-        this.attack = attack;
+        this.minAttack = minAttack;
+        this.maxAttack = maxAttack;
     }
     @Override
     public boolean isMoney() {
@@ -143,8 +153,8 @@ abstract class OffensiveItem extends Item{
 }
 
 abstract class FirstHandEquipment extends OffensiveItem{
-    public FirstHandEquipment(String name, int weight, int value, int attack){
-        super(name, weight, value, attack);
+    public FirstHandEquipment(String name, int weight, int value, int minAttack, int maxAttack){
+        super(name, weight, value, minAttack, maxAttack);
     }
 }
 
@@ -240,9 +250,10 @@ final class NoShield extends SecondHandEquipment{
     }
 }
 final class NoWeapon extends FirstHandEquipment{
-    public NoWeapon(String name, int weight, int value, int attack){
-        super(name, weight, value, attack);
+    public NoWeapon(String name, int weight, int value, int minAttack, int maxAttack){
+        super(name, weight, value, minAttack, maxAttack);
     }
+
 
     @Override
     public boolean isEmptyEquipment() {
@@ -341,8 +352,8 @@ final class Shield extends SecondHandEquipment{
     }
 }
 final class Weapon extends FirstHandEquipment{
-    public Weapon(String name, int weight, int value, int attack){
-        super(name, weight, value, attack);
+    public Weapon(String name, int weight, int value, int minAttack, int maxAttack){
+        super(name, weight, value, minAttack, maxAttack);
     }
     @Override
     public boolean isEmptyEquipment() {

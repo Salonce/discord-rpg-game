@@ -46,10 +46,10 @@ public class Inventory {
             int itemsnumber = itemList.size();
             if (itemsnumber < MAX_ITEM_NUMBER) {
                 itemList.add(item);
+                return true;
             } else {
                 throw new InventoryFullException("Inventory is full. Can't pick up the item.");
             }
-            return true;
         }
         else{
             return false;

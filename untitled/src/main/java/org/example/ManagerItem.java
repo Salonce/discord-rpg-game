@@ -1,13 +1,10 @@
 package org.example;
 
 class ManagerItem {
-    //EQUIPMENT
 
     //VARIOUS CLOTHES
     public final static Item BEANIE = new Helmet("Beanie", 1, 5, 1);
     public final static Item SANTA_HAT = new Helmet("Santa hat", 1, 50, 1);
-
-
 
     //STEEL SET (LIGHTER THAN IRON)
     public final static Item STEEL_HELMET = new Helmet("Steel helmet", 3, 25, 3);
@@ -16,7 +13,7 @@ class ManagerItem {
     public final static Item STEEL_GLOVES = new Gloves("Steel gloves", 3, 10, 3);
     public final static Item STEEL_BOOTS = new Boots("Steel boots", 4, 25, 3);
     public final static Item STEEL_SHIELD = new Shield("Steel shield", 5, 45, 6);
-    public final static Item STEEL_SWORD = new Weapon("Steel sword", 3, 45, 10);
+    public final static Item STEEL_SWORD = new Weapon("Steel sword", 3, 45, 4, 7);
 
     //IRON SET
     public final static Item IRON_HELMET = new Helmet("Iron helmet", 2, 15, 2);
@@ -35,7 +32,8 @@ class ManagerItem {
     public final static Item LEATHER_SHIELD = new Shield("Leather shield", 2, 25, 4);
 
     //WEAPONS
-    public final static Item KNIFE = new Weapon("Knife", 1, 5, 3);
+    public final static Item KNIFE = new Weapon("Knife", 1, 15, 1, 3);
+    public final static Item GABRIELAS_NAIL = new Weapon("Gabriela's nail", 1, 35, 2, 4);
 
 
     //DOLPHIN SET
@@ -48,7 +46,7 @@ class ManagerItem {
     public final static Item NO_GLOVES = new NoGloves("-", 0, 0, 0);
     public final static Item NO_BOOTS = new NoBoots("-", 0, 0, 0);
     public final static Item NO_SHIELD = new NoShield("-", 0, 0, 1);
-    public final static Item NO_WEAPON = new NoWeapon("-", 0, 0, 1);
+    public final static Item NO_WEAPON = new NoWeapon("-", 0, 0, 1, 2);
 
 
     //MONEY

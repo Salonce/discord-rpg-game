@@ -1,7 +1,7 @@
 package org.example;
 
 class ManagerDungeon {
-    public static final Dungeon CAVE = new Dungeon.DungeonBuilder().addMonster(ManagerMonster.RAT, 50).build();
+    public static final Dungeon CAVE = new Dungeon.DungeonBuilder().addMonster(ManagerMonster.ENORMOUS_RAT, 50).build();
 
     public static final Dungeon CHICKEN_CAVE = new Dungeon.DungeonBuilder()
             .addMonster(ManagerMonster.CHICK, 60)
@@ -18,7 +18,7 @@ class ManagerDungeon {
      */
 
     public static final Dungeon FOREST = new Dungeon.DungeonBuilder()
-            .addMonster(ManagerMonster.RAT, 30)
+            .addMonster(ManagerMonster.ENORMOUS_RAT, 30)
             .addMonster(ManagerMonster.BUTTERFLY, 30)
             .addMonster(ManagerMonster.SQUIRREL, 10)
             .addMonster(ManagerMonster.WOLF, 10)

@@ -10,7 +10,22 @@ class Monster implements Fighter{
         this.combatPower = monsterBuilder.combatPower;
         this.description = monsterBuilder.description;
         this.maybeItemList = monsterBuilder.maybeItemList;
+        this.health = monsterBuilder.health;
+        this.minAttack = monsterBuilder.minAttack;
+        this.maxAttack = monsterBuilder.maxAttack;
+        this.defense = monsterBuilder.defense;
+        this.speed = monsterBuilder.speed;
     }
+
+    public CombatStrength getCombatStrength(){
+        return new CombatStrength(health, minAttack, maxAttack, defense, speed);
+    }
+
+    private int health;
+    private int minAttack;
+    private int maxAttack;
+    private int defense;
+    private int speed;
 
     private ArrayList<MaybeItem> maybeItemList;
 
@@ -41,12 +56,23 @@ class Monster implements Fighter{
 
 
     public static class MonsterBuilder{
-        public MonsterBuilder(String name, int combatPower){
+        public MonsterBuilder(String name, int combatPower, int health, int minAttack, int maxAttack, int defense, int speed){
             this.name = name;
             this.combatPower = combatPower;
             this.description = "empty";
             this.maybeItemList = new ArrayList<>();
+            this.health = health;
+            this.minAttack = minAttack;
+            this.maxAttack = maxAttack;
+            this.defense = defense;
+            this.speed = speed;
         }
+        private int health;
+        private int minAttack;
+        private int maxAttack;
+        private int defense;
+        private int speed;
+
         private String name;
         private int combatPower;
 
