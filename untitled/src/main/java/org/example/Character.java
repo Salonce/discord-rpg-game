@@ -1,6 +1,9 @@
 package org.example;
 
 import discord4j.common.util.Snowflake;
+
+import java.sql.*;
+import java.time.Instant;
 import java.util.HashMap;
 
 
@@ -28,15 +31,9 @@ class Character implements Fighter{
         return new CombatStrength(stats.getHealth().get(), equipment.getTotalMinAttack(), equipment.getTotalMaxAttack(), equipment.getTotalDefence(), stats.getSpeed());
     }
 
-
-    @Override
-    public int getCombatPower() {
-        return stats.getHealth().get() * equipment.getTotalMinAttack() * equipment.getTotalDefence();
-    }
     public Health getHealth(){
         return stats.getHealth();
     }
-
 
     @Override
     public Properties getProperties() {
@@ -63,7 +60,6 @@ class Stats{
     public int getSpeed() {
         return speed;
     }
-
     public void setSpeed(int speed) {
         this.speed = speed;
     }
@@ -75,22 +71,91 @@ class Stats{
 }
 
 class Health{
-    private final int maxHealth = 100;
-
+    private int health;
+    private int regenTime = 3;
     public Health(){
         this.health = 100;
+        this.nextCd = null;
     }
+    private Instant nextCd;
 
+    private final int maxHealth = 100;
     public int getMax() {
         return maxHealth;
     }
-    private int health;
+
     public int get(){
+        System.out.println("get HP");
+        cleanAllInstants();
+        System.out.println("after get HP");
         return this.health;
     }
     public void set(int health) {
+        System.out.println("clear all instants");
+        cleanAllInstants();
         this.health = health;
+        maybeSetNewRegenTime();
+        clearIfFullHp();
+        System.out.println("after clear all instants");
     }
+
+
+
+
+    private void addHp(){
+        if (this.health < this.maxHealth)
+            this.health += 1;
+    }
+
+    private void moveRegenTimeToNext(){
+        this.nextCd = nextCd.plusSeconds(regenTime);
+    }
+
+    private void maybeSetNewRegenTime(){
+        if (health < maxHealth && nextCd == null);
+            this.nextCd = Instant.now().plusSeconds(regenTime);
+    }
+    private void clearIfFullHp(){
+        if (health >= maxHealth){
+            nextCd = null;
+        }
+    }
+
+    private boolean regenReady(){
+        if (nextCd != null && (Instant.now().compareTo(nextCd)) >= 0)
+            return true;
+        else
+            return false;
+    }
+
+    //return true if nextCd is ready for another operation
+    private void cleanOneInstant(){
+        if (nextCd != null){
+            addHp();
+            if (health < maxHealth)
+                moveRegenTimeToNext();
+            else
+                nextCd = null;
+        }
+    }
+
+    private void cleanAllInstants(){
+        while (regenReady()){
+            //nextCd can't be null
+            cleanOneInstant();
+        }
+    }
+
+
+
+
+    //private void setNextCd(Instant nextCd){
+    //    this.nextCd = nextCd;
+    //}
+
+
+
+
 }
 
 class CharacterManager {
@@ -111,47 +176,26 @@ class CharacterManager {
 }
 
 
-
 /*
-class Skills{
-    public Skills(){
+    private void insertNewId(long newId){
+        String insertIntoIds = "INSERT INTO rpg4j.ids (Snowflake) VALUES " + "(" + newId + ")";
+        String connectionUrl = "jdbc:mysql://localhost:3306/";
+
+        try (Connection conn = DriverManager.getConnection(connectionUrl, "root", "password1");
+             PreparedStatement insertPs = conn.prepareStatement(insertIntoIds);
+        ) {
+            //try{
+            insertPs.execute();
+            //} catch (SQLTimeoutException e) {
+            //    System.out.println("SQLTimeoutException2");
+            //} catch (SQLException e) {
+            //    System.out.println("Database SQLException occurs2");
+            //}
+
+        } catch (SQLTimeoutException e) {
+            System.out.println("SQLTimeoutException");
+        } catch (SQLException e) {
+            System.out.println("Database SQLException occurs");
+        }
     }
-    private int archery;
-    private int block;
-    private int swordFighting;
-}
-
-class Attributes{
-    public Attributes(){
-        this.health = 100;
-        this.mana = 100;
-        this.capacity = 100;
-        this.strength = 10;
-        this.dexterity = 10;
-        this.endurance = 10;
-    }
-
-    private int health;
-    private int mana;
-    private int strength;
-    private int dexterity;
-    private int endurance;
-    private int capacity;
-
-
-    public int getStrength() {
-        return strength;
-    }
-    public int getDexterity() {
-        return dexterity;
-    }
-    public int getEndurance() {
-        return endurance;
-    }
-    public int getHealth(){return this.health;}
-    public int getMana(){return this.mana;}
-    public int getCapacity(){return this.capacity;}
-}
-
-
  */

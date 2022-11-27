@@ -7,7 +7,6 @@ import java.util.Random;
 class Monster implements Fighter{
     public Monster(MonsterBuilder monsterBuilder){
         this.name = monsterBuilder.name;
-        this.combatPower = monsterBuilder.combatPower;
         this.description = monsterBuilder.description;
         this.maybeItemList = monsterBuilder.maybeItemList;
         this.health = monsterBuilder.health;
@@ -47,18 +46,13 @@ class Monster implements Fighter{
         return description;
     }
 
-    private int combatPower;
-    public int getCombatPower(){return this.combatPower;}
-
-
     public Properties getProperties(){return null;}
     public Weaknesses getWeaknesses(){return null;}
 
 
     public static class MonsterBuilder{
-        public MonsterBuilder(String name, int combatPower, int health, int minAttack, int maxAttack, int defense, int speed){
+        public MonsterBuilder(String name, int health, int minAttack, int maxAttack, int defense, int speed){
             this.name = name;
-            this.combatPower = combatPower;
             this.description = "empty";
             this.maybeItemList = new ArrayList<>();
             this.health = health;
@@ -74,7 +68,6 @@ class Monster implements Fighter{
         private int speed;
 
         private String name;
-        private int combatPower;
 
         private String description;
         public MonsterBuilder addDescription(String description){

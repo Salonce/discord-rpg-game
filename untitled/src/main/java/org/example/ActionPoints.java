@@ -7,7 +7,7 @@ import java.util.Iterator;
 
 class ActionPoints{
     // Duration/period operates on temporals -> duration operates on instants (instant belongs to Temporal)
-    public static final int MAX_AP = 1119;
+    public static final int MAX_AP = 50;
     public static final int AP_RECOVERY_TIME = 30;
 
     public ActionPoints(){

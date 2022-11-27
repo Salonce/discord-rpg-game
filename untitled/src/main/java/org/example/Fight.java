@@ -37,7 +37,6 @@ class CombatStrength{
 }
 
 interface Fighter{
-    int getCombatPower();
     CombatStrength getCombatStrength();
     Properties getProperties();
     Weaknesses getWeaknesses();
@@ -68,8 +67,6 @@ public class Fight {
     public Fight(Fighter fighterA, Fighter fighterB){
         this.fighterA = fighterA;
         this.fighterB = fighterB;
-        this.powerA = fighterA.getCombatPower();
-        this.powerB = fighterB.getCombatPower();
         this.results = new Results(fighterA.getCombatStrength(), fighterB.getCombatStrength());
     }
 

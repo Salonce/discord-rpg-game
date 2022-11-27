@@ -180,6 +180,8 @@ class CallHelp extends MessageProcessor{
                 .append("\n.info")
                 .append("\n.ap")
                 .append("\n.help")
+                .append("\n.stats")
+                .append("\n.hospital")
 
                 .append("\n\n**Inventory:**")
                 .append("\n.inv")
@@ -191,6 +193,7 @@ class CallHelp extends MessageProcessor{
 
                 .append("\n\n**Dungeons:**")
                 .append("\n.cave")
+                .append("\n.server")
                 .append("\n.forest");
 
         return stringBuilder.toString();
@@ -204,13 +207,16 @@ class CallHelp extends MessageProcessor{
 
 class CallCharInfo extends MessageProcessor{
     public void process(){
-        if (getContent().equals(".info") && characterCheck()){
+        if (getContent().equals(".stats") && characterCheck()){
             EmbedCreateSpec embed = EmbedCreateSpec.builder()
                 .color(Color.BLUE)
-                .addField("Combat power ", String.valueOf(getCharacter().getCombatPower()), true)
-                .addField("Action Points ", String.valueOf(getCharacter().getActionPoints().getCurrentAP()) + "/" + ActionPoints.MAX_AP, true)
+                .addField("Stats", ":hearts: " + getCharacter().getHealth().get() + "/" + getCharacter().getHealth().getMax()
+                        + "\n:hiking_boot: " + getCharacter().getActionPoints().getCurrentAP() + "/" + ActionPoints.MAX_AP
+                        //+ "\n:dagger: " + getCharacter().getEquipment().getTotalMinAttack() + "-" + getCharacter().getEquipment().getTotalMaxAttack()
+                        //+ "\n:shield: " + getCharacter().getEquipment().getTotalDefence()
+                        //+ "\n:athletic_shoe: " + getCharacter().getStats().getSpeed()
+                        , false)
                 .author(getUserName(), null, getUserAvatarUrl())
-                .timestamp(Instant.now())
                 .build();
             sendMessage(embed);
         }
@@ -380,7 +386,9 @@ class CallEquipmentInfo extends MessageProcessor{
                 .addField(addSpaces("Hands", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getHandsEquipment()), true)
                 .addField(addSpaces("1st hand", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getFirstHandEquipment()), true)
                 .addField(addSpaces("2nd hand", EQ_MAX_CHAR), getEmbedStats(getCharacter().getEquipment().getSecondHandEquipment()), true)
-                .addField("Total", ":shield: " + getCharacter().getEquipment().getTotalDefence() + "\n:dagger: " + getCharacter().getEquipment().getTotalMinAttack() + "-" + getCharacter().getEquipment().getTotalMaxAttack() + "\n:scales: " + getCharacter().getEquipment().getTotalWeight(), true)
+                .addField("Total", ":shield: " + getCharacter().getEquipment().getTotalDefence()
+                        + "\n:dagger: " + getCharacter().getEquipment().getTotalMinAttack() + "-" + getCharacter().getEquipment().getTotalMaxAttack()
+                        + "\n:scales: " + getCharacter().getEquipment().getTotalWeight(), true)
                 .author(getUserName() + " - Equipment", null, getUserAvatarUrl())
                 .timestamp(Instant.now())
                 .build();
