@@ -12,12 +12,14 @@ public class Main {
 
         //create a list of characters for users
         final AnswerManager answerManager = new AnswerManager();
-        final CharacterManager characterManager = new CharacterManager();
+        final CharacterManager characterManager = new CharacterManager("YES");
+              Model.loadAllIds(characterManager);
         final Shop basicShop = new BasicShop();
 
         MessageProcessor.setCharacterManager(characterManager);
         MessageProcessor.setDiscordClient(client);
         MessageProcessor.setShops(basicShop);
+
 
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
             answerManager.process(event.getMessage());

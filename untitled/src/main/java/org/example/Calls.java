@@ -228,12 +228,28 @@ class CallCreateCharacter extends MessageProcessor {
         try {
             if (getContent().equals(".create") && characterNegativeCheck()) {
                 getCharacterManager().createNewCharacter(getId());
+                Model.insertOneId(getId());
                 sendMessage("Character created!");
             }
         } catch (Exception e) {
         }
     }
 }
+
+class CallTester extends MessageProcessor {
+    public void process() {
+        try {
+            if (getContent().equals(".test")) {
+                Model.insertOneId(getId());
+                sendMessage("Tester applied!");
+            }
+        } catch (Exception e) {
+        }
+    }
+}
+
+
+
 class CallEquip extends MessageProcessor{
     public void process(){
         try{
@@ -440,6 +456,7 @@ class CallRat extends MessageProcessor{
                             + "\n:athletic_shoe: " + newMonster.getCombatStrength().getSpeed()
                             , true)
                     .addField(":clipboard:", printFightResult(fight, newMonster), false);
+                Model.updateOneHealth(getId(), getCharacter());
                 if (fight.getResults().getResultA().isVictory()) {
                     int lootNumber = getCharacter().getInventory().addItems(randomLoot);
                     embedBuilder.addField(":palm_down_hand:", printLoot(randomLoot, lootNumber), false);
@@ -454,6 +471,7 @@ class CallRat extends MessageProcessor{
         } catch (NotEnoughActionPointsException e) {
             sendMessage("You need 2 action points to do that!");
         }
+
     }
     private String printFightResult(Fight fight, Monster monster){
         StringBuilder stringBuilder = new StringBuilder();
@@ -579,11 +597,13 @@ class AnswerManager {
         messageProcessorList.add(new CallSell());
         messageProcessorList.add(new CallGive());
         messageProcessorList.add(new CallRat());
-
         messageProcessorList.add(new CallHospital());
         messageProcessorList.add(new CallSwap());
         messageProcessorList.add(new CallSortByName());
         messageProcessorList.add(new CallSortByValue());
+
+        messageProcessorList.add(new CallTester());
+
     }
 
     private boolean selfSending(Message message) {

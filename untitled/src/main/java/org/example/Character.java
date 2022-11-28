@@ -15,6 +15,30 @@ class Character implements Fighter{
         this.stats = new Stats();
     }
 
+    public void loadDatabase(){
+        //setCharacterHashset
+            //forEach - put (ID, newCharacter())
+
+        //class Databaseoperations.
+        //setstats(userId)
+            //userId, related hp vals, speed vals
+            //setHpVal
+            //setSpeedVal
+
+
+        //setstats
+            //load id related hp vals, speed vals
+            //setHpVal
+            //setSpeedVal
+        //seteq
+        //setinv
+        //setAP
+        //setHP
+    }
+
+
+
+
     private Stats stats;
     public Stats getStats(){return stats;}
 
@@ -71,15 +95,22 @@ class Stats{
 }
 
 class Health{
+    public static int DEFAULT_HP_REGEN = 3;
+    public static int DEFAULT_MAX_HEALTH = 100;
+
     private int health;
-    private int regenTime = 3;
+    private int regenTime = DEFAULT_HP_REGEN;
+    public int getRegen(){
+        return regenTime;
+    }
+
     public Health(){
-        this.health = 100;
+        this.health = DEFAULT_MAX_HEALTH;
         this.nextCd = null;
     }
     private Instant nextCd;
 
-    private final int maxHealth = 100;
+    private int maxHealth = DEFAULT_MAX_HEALTH;
     public int getMax() {
         return maxHealth;
     }
@@ -99,8 +130,13 @@ class Health{
         System.out.println("after clear all instants");
     }
 
+    public void setMax(int maxHealth) {
+        this.maxHealth = health;
+    }
 
-
+    public void setRegenTime(int regenTime) {
+        this.regenTime = regenTime;
+    }
 
     private void addHp(){
         if (this.health < this.maxHealth)
@@ -145,22 +181,16 @@ class Health{
             cleanOneInstant();
         }
     }
-
-
-
-
-    //private void setNextCd(Instant nextCd){
-    //    this.nextCd = nextCd;
-    //}
-
-
-
-
 }
 
 class CharacterManager {
     private final HashMap<Snowflake, Character> usersCharacters;
-    public CharacterManager() {
+
+    public HashMap<Snowflake, Character> getUsersCharacters() {
+        return usersCharacters;
+    }
+
+    public CharacterManager(String dbLoad) {
         usersCharacters = new HashMap<>();
     }
     public void createNewCharacter(Snowflake id){
@@ -176,26 +206,5 @@ class CharacterManager {
 }
 
 
-/*
-    private void insertNewId(long newId){
-        String insertIntoIds = "INSERT INTO rpg4j.ids (Snowflake) VALUES " + "(" + newId + ")";
-        String connectionUrl = "jdbc:mysql://localhost:3306/";
 
-        try (Connection conn = DriverManager.getConnection(connectionUrl, "root", "password1");
-             PreparedStatement insertPs = conn.prepareStatement(insertIntoIds);
-        ) {
-            //try{
-            insertPs.execute();
-            //} catch (SQLTimeoutException e) {
-            //    System.out.println("SQLTimeoutException2");
-            //} catch (SQLException e) {
-            //    System.out.println("Database SQLException occurs2");
-            //}
 
-        } catch (SQLTimeoutException e) {
-            System.out.println("SQLTimeoutException");
-        } catch (SQLException e) {
-            System.out.println("Database SQLException occurs");
-        }
-    }
- */
