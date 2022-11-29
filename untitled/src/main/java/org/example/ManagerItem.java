@@ -1,10 +1,54 @@
 package org.example;
 
-class ManagerItem {
+import java.util.HashMap;
 
-    //VARIOUS CLOTHES
-    public final static Item BEANIE = new Helmet("Beanie", 1, 5, 1);
-    public final static Item SANTA_HAT = new Helmet("Santa hat", 1, 50, 1);
+class ManagerItem {
+    private static final HashMap<String, Item> itemHashMap = new HashMap<>();
+    public static Item get(String string){
+        return itemHashMap.get(string);
+    }
+
+
+    static {
+        itemHashMap.put("BEANIE", new Helmet("Beanie", 1, 5, 1));
+
+        itemHashMap.put("STEEL_HELMET", new Helmet("Steel helmet", 3, 25, 3));
+        itemHashMap.put("STEEL_ARMOR", new Helmet("Steel armor", 1, 5, 1));
+        itemHashMap.put("STEEL_TROUSERS", new Trousers("Steel trousers", 10, 35, 7));
+        itemHashMap.put("STEEL_GLOVES", new Gloves("Steel gloves", 3, 10, 3));
+        itemHashMap.put("STEEL_BOOTS", new Boots("Steel boots", 4, 25, 3));
+        itemHashMap.put("STEEL_SHIELD", new Shield("Steel shield", 5, 45, 6));
+        itemHashMap.put("STEEL_SWORD", new Weapon("Steel sword", 3, 45, 4, 7));
+
+        itemHashMap.put("KNIFE", new Weapon("Knife", 1, 15, 1, 3));
+        itemHashMap.put("GABRIELAS_NAIL", new Weapon("Gabriela's nail", 1, 35, 2, 4));
+        itemHashMap.put("PIGEON_MUSCLE", new Weapon("Pigeon's muscle", 1, 15, 1, 5));
+
+        itemHashMap.put("DOLPHIN_SHIELD", new Shield("Dolphin shield", 3, 155, 16));
+
+        itemHashMap.put("NO_HELMET", new NoHelmet("-", 0, 0, 0));
+        itemHashMap.put("NO_ARMOR", new NoArmor("-", 0, 0, 0));
+        itemHashMap.put("NO_TROUSERS", new NoTrousers("-", 0, 0, 0));
+        itemHashMap.put("NO_GLOVES", new NoGloves("-", 0, 0, 0));
+        itemHashMap.put("NO_BOOTS", new NoBoots("-", 0, 0, 0));
+        itemHashMap.put("NO_SHIELD", new NoShield("-", 0, 0, 1));
+        itemHashMap.put("NO_WEAPON", new NoWeapon("-", 0, 0, 1, 2));
+
+        itemHashMap.put("DOLPHIN_FIN", new CraftingItem("Dolphin's fin", 2, 100));
+        itemHashMap.put("SHEEP_WOOL", new CraftingItem("Sheep wool", 2, 100));
+        itemHashMap.put("RAT_TAIL", new CraftingItem("Rat's tail", 1, 5));
+        itemHashMap.put("RAT_MEAT", new CraftingItem("Rat's meat", 3, 3));
+        itemHashMap.put("BEAR_MEAT", new CraftingItem("Bear's meat", 5, 15));
+        itemHashMap.put("BEAR_SKIN", new CraftingItem("Bear's skin", 10, 50));
+        itemHashMap.put("BUTTERFLY_WING", new CraftingItem("Butterfly's wing", 0, 10));
+        itemHashMap.put("GABRIELAS_TONGUE", new CraftingItem("Gabriela's tongue", 1, 50));
+        itemHashMap.put("FINGERHOODS_STORY", new CraftingItem("Fingerhood's story", 100, 0));
+        itemHashMap.put("FEATHER", new CraftingItem("Feather", 0, 1));
+    }
+
+
+
+
 
     //STEEL SET (LIGHTER THAN IRON)
     public final static Item STEEL_HELMET = new Helmet("Steel helmet", 3, 25, 3);
@@ -14,22 +58,6 @@ class ManagerItem {
     public final static Item STEEL_BOOTS = new Boots("Steel boots", 4, 25, 3);
     public final static Item STEEL_SHIELD = new Shield("Steel shield", 5, 45, 6);
     public final static Item STEEL_SWORD = new Weapon("Steel sword", 3, 45, 4, 7);
-
-    //IRON SET
-    public final static Item IRON_HELMET = new Helmet("Iron helmet", 2, 15, 2);
-    public final static Item IRON_ARMOR = new Armor("Iron armor", 5, 35, 3);
-    public final static Item IRON_TROUSERS = new Trousers("Iron trousers", 3, 25, 2);
-    public final static Item IRON_GLOVES = new Gloves("Iron gloves", 1, 5, 1);
-    public final static Item IRON_BOOTS = new Boots("Iron boots", 1, 15, 1);
-    public final static Item IRON_SHIELD = new Shield("Iron shield", 2, 25, 4);
-
-    //LEATHER SET
-    public final static Item LEATHER_HELMET = new Helmet("Leather helmet", 2, 15, 2);
-    public final static Item LEATHER_ARMOR = new Armor("Leather armor", 5, 35, 3);
-    public final static Item LEATHER_TROUSERS = new Trousers("Leather trousers", 3, 25, 2);
-    public final static Item LEATHER_GLOVES = new Gloves("Leather gloves", 1, 5, 1);
-    public final static Item LEATHER_BOOTS = new Boots("Leather boots", 1, 15, 1);
-    public final static Item LEATHER_SHIELD = new Shield("Leather shield", 2, 25, 4);
 
     //WEAPONS
     public final static Item KNIFE = new Weapon("Knife", 1, 15, 1, 3);
@@ -67,6 +95,28 @@ class ManagerItem {
     public final static Item FINGERHOODS_STORY = new CraftingItem("Fingerhood's story", 100, 0);
 
     public final static Item FEATHER = new CraftingItem("Feather", 0, 1);
+
+    //IRON SET
+    public final static Item IRON_HELMET = new Helmet("Iron helmet", 2, 15, 2);
+    public final static Item IRON_ARMOR = new Armor("Iron armor", 5, 35, 3);
+    public final static Item IRON_TROUSERS = new Trousers("Iron trousers", 3, 25, 2);
+    public final static Item IRON_GLOVES = new Gloves("Iron gloves", 1, 5, 1);
+    public final static Item IRON_BOOTS = new Boots("Iron boots", 1, 15, 1);
+    public final static Item IRON_SHIELD = new Shield("Iron shield", 2, 25, 4);
+
+    //LEATHER SET
+    public final static Item LEATHER_HELMET = new Helmet("Leather helmet", 2, 15, 2);
+    public final static Item LEATHER_ARMOR = new Armor("Leather armor", 5, 35, 3);
+    public final static Item LEATHER_TROUSERS = new Trousers("Leather trousers", 3, 25, 2);
+    public final static Item LEATHER_GLOVES = new Gloves("Leather gloves", 1, 5, 1);
+    public final static Item LEATHER_BOOTS = new Boots("Leather boots", 1, 15, 1);
+    public final static Item LEATHER_SHIELD = new Shield("Leather shield", 2, 25, 4);
+
+
+    //VARIOUS CLOTHES
+    public final static Item BEANIE = new Helmet("Beanie", 1, 5, 1);
+    public final static Item SANTA_HAT = new Helmet("Santa hat", 1, 50, 1);
+
 
 
 }

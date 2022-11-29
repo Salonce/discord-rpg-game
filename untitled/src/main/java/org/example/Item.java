@@ -3,29 +3,63 @@ package org.example;
 import java.util.Comparator;
 
 enum Wearable{
-    HEAD,
-    TORSO,
-    LEGS,
-    FEET,
-    HANDS,
-    FIRSTHAND,
-    SECONDHAND,
-    NOTHING
+    HEAD ("HEAD"),
+    TORSO ("TORSO"),
+    LEGS ("LEGS"),
+    FEET ("FEET"),
+    HANDS ("HANDS"),
+    FIRSTHAND ("FIRSTHAND"),
+    SECONDHAND ("SECONDHAND"),
+    NOTHING ("NOTHING");
+
+    private final String where;
+    Wearable(String where){
+        this.where = where;
+    }
+
+    public boolean isEq(){
+        return false;
+    }
+    public boolean isHeadEq(){
+        return false;
+    }
+    public boolean isTorsoEq(){
+        return false;
+    }
+    public boolean isLegsEq(){
+        return false;
+    }
+    public boolean isFeetEq(){
+        return false;
+    }
+    public boolean isHandsEq(){
+        return false;
+    }
+    public boolean isFirstHandEq(){
+        return false;
+    }
+    public boolean isSecondHandEq(){
+        return false;
+    }
 }
 
 abstract class Item{
-
+    private final int PRICE_MULTIPLICATOR = 2;
     //public static int MAX_ITEM_NAME_LENGTH = 15;
-    public Item(String name, int weight, int value){
 
+    public Item(String name, int weight, int value){
         this.name = name;
         this.weight = weight;
         this.value = value;
         this.defence = 0;
         this.minAttack = 0;
         this.maxAttack = 0;
+        this.hasDefense = false;
+        this.hasAttack = false;
+        this.isEmptyEq = false;
+        this.isMoney = false;
+        this.wearable = Wearable.NOTHING;
     }
-    private final int PRICE_MULTIPLICATOR = 2;
 
     protected String name;
     protected int weight;
@@ -33,6 +67,11 @@ abstract class Item{
     protected int defence;
     protected int minAttack;
     protected int maxAttack;
+    protected boolean hasDefense;
+    protected boolean hasAttack;
+    protected boolean isEmptyEq;
+    protected boolean isMoney;
+    protected Wearable wearable;
     //private int price;
 
     protected String getName(){return name;}
@@ -56,22 +95,26 @@ abstract class Item{
         else return 0;
     }
 
-    public abstract boolean isMoney();
-    public abstract boolean hasAttack();
-    public abstract boolean hasDefense();
-    public abstract boolean isEmptyEquipment();
-
-    public abstract Wearable getWearable();
 
     public boolean isEquipment(){
         return !isEmptyEquipment();
     };
-    //public boolean checkWearable() throws NotWearableItemException {
-    //    if (!getWearable().equals(Wearable.NOTHING))
-    //        return true;
-    //    else
-    //        throw new NotWearableItemException();
-    //}
+    public boolean hasAttack(){
+        return this.hasAttack;
+    }
+    public boolean hasDefense(){
+        return this.hasDefense;
+    }
+    public Wearable getWearable(){
+        return this.wearable;
+    }
+    public boolean isMoney(){
+        return this.isMoney;
+    }
+    public boolean isEmptyEquipment(){
+        return false;
+    }
+
 }
 
 
@@ -80,18 +123,7 @@ abstract class DefensiveItem extends Item{
     public DefensiveItem(String name, int weight, int value, int defence){
         super(name, weight, value);
         this.defence = defence;
-    }
-    @Override
-    public boolean isMoney() {
-        return false;
-    }
-    @Override
-    public boolean hasAttack() {
-        return false;
-    }
-    @Override
-    public boolean hasDefense() {
-        return true;
+        this.hasDefense = true;
     }
 }
 
@@ -136,19 +168,7 @@ abstract class OffensiveItem extends Item{
         super(name, weight, value);
         this.minAttack = minAttack;
         this.maxAttack = maxAttack;
-    }
-    @Override
-    public boolean isMoney() {
-        return false;
-    }
-    @Override
-    public boolean hasAttack() {
-        return true;
-    }
-
-    @Override
-    public boolean hasDefense() {
-        return false;
+        this.hasAttack = true;
     }
 }
 
@@ -158,211 +178,96 @@ abstract class FirstHandEquipment extends OffensiveItem{
     }
 }
 
-
 class NoHelmet extends HeadEquipment{
     public NoHelmet(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return true;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.HEAD;
+        this.isEmptyEq = true;
+        wearable = Wearable.HEAD;
     }
 }
 final class NoArmor extends TorsoEquipment{
     public NoArmor(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return true;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.TORSO;
+        this.isEmptyEq = true;
+        wearable = Wearable.TORSO;
     }
 }
 final class NoTrousers extends LegsEquipment{
     public NoTrousers(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return true;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.LEGS;
-    }
+        this.isEmptyEq = true;
+        this.wearable = Wearable.LEGS;
+    };
 }
 final class NoGloves extends HandsEquipment{
     public NoGloves(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
+        this.isEmptyEq = true;
+        this.wearable = Wearable.HANDS;
     }
 
-    @Override
-    public boolean isEmptyEquipment() {
-        return true;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.HANDS;
-    }
 }
 final class NoBoots extends BootsEquipment{
     public NoBoots(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return true;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.FEET;
+        this.isEmptyEq = true;
+        this.wearable = Wearable.FEET;
     }
 }
 final class NoShield extends SecondHandEquipment{
     public NoShield(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return true;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.SECONDHAND;
+        this.isEmptyEq = true;
+        this.wearable = Wearable.SECONDHAND;
     }
 }
 final class NoWeapon extends FirstHandEquipment{
     public NoWeapon(String name, int weight, int value, int minAttack, int maxAttack){
         super(name, weight, value, minAttack, maxAttack);
+        this.isEmptyEq = true;
+        this.wearable = Wearable.FIRSTHAND;
     }
-
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return true;
-    }
-
-    @Override
-    public Wearable getWearable() {return Wearable.FIRSTHAND;}
 }
-
-
 class Helmet extends HeadEquipment{
     public Helmet(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.HEAD;
+        this.wearable = Wearable.HEAD;
     }
 }
 final class Armor extends TorsoEquipment{
     public Armor(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.TORSO;
+        this.wearable = Wearable.TORSO;
     }
 }
 final class Trousers extends LegsEquipment{
     public Trousers(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.LEGS;
+        this.wearable = Wearable.LEGS;
     }
 }
 final class Gloves extends HandsEquipment{
     public Gloves(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.HANDS;
+        this.wearable = Wearable.HANDS;
     }
 }
 final class Boots extends BootsEquipment{
     public Boots(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.FEET;
+        this.wearable = Wearable.FEET;
     }
 }
 final class Shield extends SecondHandEquipment{
     public Shield(String name, int weight, int value, int defence){
         super(name, weight, value, defence);
-    }
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.SECONDHAND;
+        this.wearable = Wearable.SECONDHAND;
     }
 }
 final class Weapon extends FirstHandEquipment{
     public Weapon(String name, int weight, int value, int minAttack, int maxAttack){
         super(name, weight, value, minAttack, maxAttack);
-    }
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.FIRSTHAND;
+        this.wearable = Wearable.FIRSTHAND;
     }
 }
 
@@ -370,61 +275,12 @@ final class CraftingItem extends Item{
     public CraftingItem(String name, int weight, int value){
         super(name, weight, value);
     }
-
-    @Override
-    public boolean isMoney() {
-        return false;
-    }
-
-    @Override
-    public boolean hasAttack() {
-        return false;
-    }
-
-    @Override
-    public boolean hasDefense() {
-        return false;
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.NOTHING;
-    }
 }
 
 final class Money extends Item{
     public Money(String name, int weight, int value){
         super(name, weight, value);
-    }
-
-    @Override
-    public boolean isMoney() {
-        return true;
-    }
-
-    @Override
-    public boolean hasAttack() {
-        return false;
-    }
-
-    @Override
-    public boolean hasDefense() {
-        return false;
-    }
-
-    @Override
-    public boolean isEmptyEquipment() {
-        return false;
-    }
-
-    @Override
-    public Wearable getWearable() {
-        return Wearable.NOTHING;
+        this.isMoney = true;
     }
 }
 

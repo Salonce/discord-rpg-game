@@ -32,6 +32,9 @@ class Equipment{
     }
 
 
+
+
+
     public void equip(Item item) throws NotWearableItemException {
         if (item.getWearable() == Wearable.HEAD){
             headEquipment = item;
@@ -57,6 +60,10 @@ class Equipment{
         else
             throw new NotWearableItemException();
     }
+
+    //private Item chooseByName(String name){
+    //
+    //}
 
     public Item get(String name){
         if (headEquipment.getName().equalsIgnoreCase(name)){
@@ -109,6 +116,7 @@ class Equipment{
     }
 
     public Item remove(String name) {
+        //Item = get(name)  can be used
         Item item = null;
         if (headEquipment.getName().equalsIgnoreCase(name)){
             item = headEquipment;
