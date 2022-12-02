@@ -195,7 +195,7 @@ class CharacterManager {
     public void createCharAndPutInDb(Snowflake id){
         if (!usersCharacters.containsKey(id)){
             createCharacter(id);
-            Model.addAllToDb(id);
+            Model.addAllToUserDb(id);
         }
     }
 
